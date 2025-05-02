@@ -4,7 +4,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'com.githubbest'
+group = 'com.specialwarriors'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -38,7 +38,7 @@ dependencies {
 
 
     //oauth2
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    //implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     //lombok
     compileOnly 'org.projectlombok:lombok'
