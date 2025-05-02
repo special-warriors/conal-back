@@ -1,4 +1,4 @@
-package com.githubbest.conal;
+package com.specialwarriors.conal;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

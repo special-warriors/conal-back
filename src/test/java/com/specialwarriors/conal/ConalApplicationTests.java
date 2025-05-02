@@ -1,4 +1,4 @@
-package com.githubbest.conal;
+package com.specialwarriors.conal;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
