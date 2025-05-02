@@ -1,0 +1,3 @@
+[submodule "src/main/resources/conal-back-secret"]
+	path = src/main/resources/conal-back-secret
+	url = https://github.com/g-repo-analyzer/conal-back-secret.git
