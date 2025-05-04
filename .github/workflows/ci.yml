@@ -1,4 +1,4 @@
-name: ci-cd pipeline
+name: ci
 on:
   pull_request:
     branches:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: repository-checkout
+      - name: repository checkout
         uses: actions/checkout@v3
         with:
           submodules: true
