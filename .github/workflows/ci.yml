@@ -1,0 +1,39 @@
+name: ci
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+    paths-ignore:
+      - 'README.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: repository checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+
+      - name: JDK setup
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: grant execute permission to gradlew
+        run: chmod +x gradlew
+
+      - name: gradlew test
+        run: ./gradlew test
