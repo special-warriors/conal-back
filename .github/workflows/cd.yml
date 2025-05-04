@@ -59,7 +59,7 @@ jobs:
             docker run -d --name conal-back-new -p 8080:8080 conalroot/conal-back:latest
             
             echo "waiting for app to start..."
-            sleep 10
+            sleep 60
             
             if curl -f http://localhost:8080/actuator/health; then
               echo "health check passed. finalizing..."
