@@ -22,7 +22,8 @@ jobs:
       - name: repository checkout
         uses: actions/checkout@v3
         with:
-          submodules: true
+          submodules: recursive
+          fetch-depth: 0
           token: ${{ secrets.PAT }}
 
       - name: JDK setup
