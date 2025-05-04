@@ -46,6 +46,8 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e
+            
             docker pull conalroot/conal-back
             
             sudo mkdir -p /var/log/conal
@@ -58,22 +60,21 @@ jobs:
             
             echo "waiting for app to start..."
             sleep 10
-            curl -f http://localhost:8080/actuator/health
             
-            docker stop conal-back-backup || true
-            docker rm conal-back-backup || true
-            docker stop conal-back-new
-            docker rename conal-back-new conal-back
-            docker start conal-back
-            echo "deployment success"
-            
-            || (
+            if curl -f http://localhost:8080/actuator/health; then
+              echo "health check passed. finalizing..."
+              docker stop conal-back-backup || true
+              docker rm conal-back-backup || true
+              docker stop conal-back-new
+              docker rename conal-back-new conal-back
+              docker start conal-back
+              echo "deployment success"
+            else
               echo "health check failed. rolling back..."
-            
+              docker logs conal-back-new || true
               docker stop conal-back-new || true
               docker rm conal-back-new || true
               docker rename conal-back-backup conal-back || true
               docker start conal-back || true
-            
               exit 1
-            )
+            fi
