@@ -1,0 +1,78 @@
+name: cd
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+    paths-ignore:
+      - 'README.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: repository checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          token: ${{ secrets.PAT }}
+
+      - name: login to dockerhub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCK_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: build and push docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: conalroot/conal-back:latest
+
+      - name: deploy to ec2 with rollback on failure
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull conalroot/conal-back
+            
+            sudo mkdir -p /var/log/conal
+            sudo chmod 777 /var/log/conal
+            
+            docker stop conal-back || true
+            docker rename conal-back conal-back-backup || true
+            
+            docker run -d --name conal-back-new -p 8080:8080 conalroot/conal-back:latest
+            
+            echo "waiting for app to start..."
+            sleep 10
+            curl -f http://localhost:8080/actuator/health
+            
+            docker stop conal-back-backup || true
+            docker rm conal-back-backup || true
+            docker stop conal-back-new
+            docker rename conal-back-new conal-back
+            docker start conal-back
+            echo "deployment success"
+            
+            || (
+              echo "health check failed. rolling back..."
+            
+              docker stop conal-back-new || true
+              docker rm conal-back-new || true
+              docker rename conal-back-backup conal-back || true
+              docker start conal-back || true
+            
+              exit 1
+            )
