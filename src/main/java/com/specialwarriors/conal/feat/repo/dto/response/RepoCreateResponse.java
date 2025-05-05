@@ -1,12 +1,11 @@
 package com.specialwarriors.conal.feat.repo.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class RepoCreateResponse {
+public record RepoCreateResponse(
+    String name,
+    String url,
+    LocalDate endDate
+) {
 
 }

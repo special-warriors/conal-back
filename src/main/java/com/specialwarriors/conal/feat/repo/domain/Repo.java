@@ -8,16 +8,21 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Repo {
 
@@ -35,32 +40,23 @@ public class Repo {
     private LocalDate endDate;
 
     @OneToMany(mappedBy = "repo", cascade = CascadeType.ALL)
+    @Default
     private List<Contributor> contributors = new ArrayList<>();
 
-    @OneToMany(mappedBy = "repo", cascade = CascadeType.ALL)
-    private List<NotificationAgreement> notificationAgreements = new ArrayList<>();
+    @OneToOne(mappedBy = "repo", cascade = CascadeType.ALL)
+    private NotificationAgreement notificationAgreement;
 
-    @Builder
-    public Repo(String name, String url, LocalDate endDate,
-        List<Contributor> contributors, List<NotificationAgreement> notificationAgreements) {
-
-        this.name = name;
-        this.url = url;
-        this.endDate = endDate;
-        this.contributors = contributors;
-        this.notificationAgreements = notificationAgreements;
+    //연관관계 메서드
+    public void addContributors(List<Contributor> contributors) {
+        for (Contributor contributor : contributors) {
+            this.contributors.add(contributor);
+            contributor.setRepo(this);
+        }
     }
 
-    public static Repo of(String name, String url, LocalDate endDate,
-        List<Contributor> contributors, List<NotificationAgreement> notificationAgreements) {
-
-        return Repo.builder()
-            .name(name)
-            .url(url)
-            .endDate(endDate)
-            .contributors(contributors)
-            .notificationAgreements(notificationAgreements)
-            .build();
+    public void setNotificationAgreement(NotificationAgreement agreement) {
+        this.notificationAgreement = agreement;
+        agreement.setRepo(this);
     }
 
 }

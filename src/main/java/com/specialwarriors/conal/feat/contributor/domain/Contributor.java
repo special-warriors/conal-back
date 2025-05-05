@@ -9,12 +9,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Contributor {
 
@@ -30,17 +33,15 @@ public class Contributor {
     @JoinColumn(name = "repo_id")
     private Repo repo;
 
+    public static Contributor of(String email) {
+        return Contributor.builder()
+            .email(email)
+            .build();
+    }
 
-    @Builder
-    public Contributor(String email, Repo repo) {
-        this.email = email;
+    // 연관관계 메서드
+    public void setRepo(Repo repo) {
         this.repo = repo;
     }
 
-    public static Contributor of(String email, Repo repo) {
-        return Contributor.builder()
-            .email(email)
-            .repo(repo)
-            .build();
-    }
 }
