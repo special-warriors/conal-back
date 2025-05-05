@@ -23,6 +23,7 @@ public class NotificationAgreement {
 
     @Id
     @GeneratedValue
+    @Column(name = "notification_agreement_id")
     private Long id;
 
     @Column(nullable = false)
