@@ -18,8 +18,33 @@ spring:
   profiles:
     active: dev
 
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            scope: read:user
+            redirect-uri: "http://localhost:8080/login/oauth2/code/github"
+            client-name: GitHub
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: login
+
+  jwt:
+    secretKey: ${JWT_SECRET_KEY}
+    access_token_exp_time: 60 * 60 * 1000L; # 1시간
+    refresh_token_exp_time: 60 * 60 * 1000 * 24 * 7L; # 7일
+
+
+
 github:
   token: ${GITHUB_TOKEN}
+
 ---
 
 # dev 프로필 전용 설정
