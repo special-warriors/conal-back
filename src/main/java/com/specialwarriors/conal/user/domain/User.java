@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
@@ -24,12 +23,15 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany
-    @JoinColumn(name = "user_id")
+    @OneToMany(mappedBy = "user")
     private List<GithubRepo> githubRepos = new ArrayList<>();
 
     public boolean hasGithubRepo(long repositoryId) {
 
         return githubRepos.stream().anyMatch(repo -> repo.getId() == repositoryId);
+    }
+
+    public void addGithubRepo(GithubRepo githubRepo) {
+        githubRepos.add(githubRepo);
     }
 }

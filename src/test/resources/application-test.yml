@@ -1,0 +1,19 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  datasource :
+    url: jdbc:h2:mem:test
+    driverClassName: org.h2.Driver
+    username: root
+    password: 1234
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
