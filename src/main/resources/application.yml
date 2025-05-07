@@ -36,9 +36,9 @@ spring:
             user-name-attribute: login
 
   jwt:
-    secretKey: ${JWT_SECRET_KEY}
-    access_token_exp_time: 60 * 60 * 1000L; # 1시간
-    refresh_token_exp_time: 60 * 60 * 1000 * 24 * 7L; # 7일
+    secret-key: ${JWT_SECRET_KEY}
+    access-token-exp: 3600000 # 60 * 60 * 1000: 1시간
+    refresh-token-exp: 604800000 # 60 * 60 * 1000 * 24 * 7L: 7일
 
 
 
