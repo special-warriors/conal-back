@@ -17,14 +17,21 @@ import org.springframework.stereotype.Component;
 public class JwtProvider {
 
     private final SecretKey secretKey;
+    @Value("${spring.jwt.access-token-exp}")
+    private long accessTokenExp;
+    @Value("${spring.jwt.refresh-token-exp}")
+    private long refreshTokenExp;
 
     public JwtProvider(@Value("${spring.jwt.secret-key}") String secret) {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8),
                 SIG.HS256.key().build().getAlgorithm());
     }
 
-    public String createAccessToken(@Value("${spring.jwt.access-token-exp") long accessTokenExp,
-            Long userId) {
+    public JwtTokenDto generateTokens(Long userId) {
+        return new JwtTokenDto(createAccessToken(userId), createRefreshToken(userId));
+    }
+
+    public String createAccessToken(Long userId) {
         Date now = new Date();
         Date accessExp = new Date(now.getTime() + accessTokenExp);
 
@@ -36,8 +43,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String createRefreshToken(@Value("${jwt.refresh_token_exp_time") long refreshTokenExp,
-            Long userId) {
+    public String createRefreshToken(Long userId) {
         Date now = new Date();
         Date refreshExp = new Date(now.getTime() + refreshTokenExp);
 
