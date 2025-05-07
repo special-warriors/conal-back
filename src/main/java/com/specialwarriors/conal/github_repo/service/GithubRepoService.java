@@ -6,6 +6,7 @@ import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.github_repo.dto.GithubRepoMapper;
 import com.specialwarriors.conal.github_repo.dto.request.GithubRepoCreateRequest;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoCreateResponse;
+import com.specialwarriors.conal.github_repo.dto.response.GithubRepoDeleteResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepository;
@@ -87,4 +88,12 @@ public class GithubRepoService {
         return githubRepoMapper.toGithubRepoPageResponse(resultPage);
     }
 
+    @Transactional
+    public GithubRepoDeleteResponse deleteRepo(Long userId, Long repositoryId) {
+        GithubRepo repo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repositoryId);
+
+        githubRepoRepository.delete(repo);
+
+        return githubRepoMapper.toGithubDeleteRepoResponse();
+    }
 }

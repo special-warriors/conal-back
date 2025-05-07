@@ -2,10 +2,12 @@ package com.specialwarriors.conal.github_repo.controller;
 
 import com.specialwarriors.conal.github_repo.dto.request.GithubRepoCreateRequest;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoCreateResponse;
+import com.specialwarriors.conal.github_repo.dto.response.GithubRepoDeleteResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.service.GithubRepoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,6 +47,13 @@ public class GithubRepoRestController {
 
         GithubRepoGetResponse response = githubRepoService.getGithubRepo(userId, repositoryId);
         return Mono.just(response);
+
+    }
+
+    @DeleteMapping("/{repositoryId}")
+    public GithubRepoDeleteResponse deleteResponse(@PathVariable long userId,
+        @PathVariable long repositoryId) {
+        return githubRepoService.deleteRepo(userId, repositoryId);
     }
 
 }
