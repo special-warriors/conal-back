@@ -17,26 +17,58 @@ public class GitHubController {
     private final GitHubService githubService;
 
 
-    @GetMapping("/user/{username}")
-    public Flux<Map<String, Object>> getUser(@PathVariable String username) {
-        return githubService.getUserInfo(username);
+    @GetMapping("/user/{owner}")
+    public Flux<Map<String, Object>> getUser(@PathVariable String owner) {
+        return githubService.getUserInfo(owner);
     }
 
-    @GetMapping("users/{username}/repos")
-    public Flux<Map<String, Object>> getRepos(@PathVariable String username) {
-        return githubService.getRepos(username);
+    @GetMapping("users/{owner}/repos")
+    public Flux<Map<String, Object>> getRepos(@PathVariable String owner) {
+        return githubService.getRepos(owner);
     }
 
-    @GetMapping("repos/{username}/{repo}")
-    public Flux<Map<String, Object>> getRepo(@PathVariable String username,
+    @GetMapping("repos/{owner}/{repo}")
+    public Flux<Map<String, Object>> getRepo(@PathVariable String owner,
         @PathVariable String repo) {
-        return githubService.getRepo(username, repo);
+        return githubService.getRepo(owner, repo);
     }
 
-    @GetMapping("/repos/{username}/{repo}/commits")
-    public Flux<Map<String, Object>> getCommits(@PathVariable String username,
+    @GetMapping("/repos/{owner}/{repo}/commits")
+    public Flux<Map<String, Object>> getCommits(@PathVariable String owner,
         @PathVariable String repo) {
-        return githubService.getCommit(username, repo);
+        return githubService.getCommit(owner, repo);
+    }
+
+    @GetMapping("/repos/{owner}/{repo}/contributors")
+    public Flux<Map<String, Object>> getContributors(@PathVariable String owner,
+        @PathVariable String repo
+    ) {
+        return githubService.getContributors(owner, repo);
+    }
+
+    @GetMapping("/repos/{owner}/{repo}/commits/{username}")
+    public Flux<Map<String, Object>> getCommits(@PathVariable String owner,
+        @PathVariable String repo,
+        @PathVariable String username
+    ) {
+        return githubService.getCommits(username, owner, repo);
+    }
+
+    @GetMapping("/repos/{owner}/{repo}/pulls/{username}")
+    public Flux<Map<String, Object>> getPullRequests(
+        @PathVariable String owner,
+        @PathVariable String repo,
+        @PathVariable String username
+    ) {
+        return githubService.getPullRequests(owner, repo, username);
+    }
+
+    @GetMapping("/repos/{owner}/{repo}/pulls")
+    public Flux<Map<String, Object>> getAllPullRequests(
+        @PathVariable String owner,
+        @PathVariable String repo
+    ) {
+        return githubService.getAllPullRequest(owner, repo);
     }
 
 }
