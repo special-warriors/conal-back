@@ -1,14 +1,47 @@
-<!-- templates/home.html -->
+<!-- home.html -->
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Welcome</title>
+  <title>Home</title>
 </head>
 <body>
-<h1>환영합니다,사용자님!</h1>
+<h1>환영합니다!</h1>
+<script>
+  alert(`환영합니다, 사용자님!`);
+</script>
 
-<p>이곳은 로그인 후 보여지는 메인 페이지입니다.</p>
+<!--<script th:inline="javascript">-->
+<!--  /*<![CDATA[*/-->
+<!--  const accessToken = /*[[${accessToken}]]*/ null;-->
+<!--  if (accessToken) {-->
+<!--    localStorage.setItem("accessToken", accessToken);-->
+<!--  }-->
+<!--  /*]]>*/-->
+<!--</script>-->
+
+<!--<button onclick="loadUserData()">내 정보 가져오기</button>-->
+
+<!--<script>-->
+<!--  async function loadUserData() {-->
+<!--    const token = localStorage.getItem("accessToken");-->
+
+<!--    const response = await fetch("/api/user/info", {-->
+<!--      method: "GET",-->
+<!--      headers: {-->
+<!--        "Authorization": `Bearer ${token}`,-->
+<!--        "Content-Type": "application/json"-->
+<!--      }-->
+<!--    });-->
+
+<!--    if (response.ok) {-->
+<!--      const data = await response.json();-->
+<!--      alert(`환영합니다, ${data.username}님!`);-->
+<!--    } else {-->
+<!--      alert("인증 실패! 다시 로그인해주세요.");-->
+<!--    }-->
+<!--  }-->
+<!--</script>-->
 
 </body>
 </html>
