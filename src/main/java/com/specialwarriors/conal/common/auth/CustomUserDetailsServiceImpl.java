@@ -1,6 +1,6 @@
 package com.specialwarriors.conal.common.auth;
 
-import com.specialwarriors.conal.feat.user.repository.UserRepository;
+import com.specialwarriors.conal.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
