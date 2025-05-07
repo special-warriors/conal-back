@@ -29,14 +29,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-//        response.getWriter().write("""
-//                {
-//                  "accessToken": "%s",
-//                  "refreshToken": "%s"
-//                }
-//                """.formatted(tokens.accessToken(), tokens.refreshToken())
-//        );
-
         response.sendRedirect("/home");
     }
 }
