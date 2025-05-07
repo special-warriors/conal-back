@@ -1,9 +1,9 @@
 package com.specialwarriors.conal.common.config;
 
-import com.specialwarriors.conal.common.auth.CustomOAuth2FailureHandler;
-import com.specialwarriors.conal.common.auth.CustomOAuth2SuccessHandler;
-import com.specialwarriors.conal.common.auth.CustomOAuth2UserService;
-import com.specialwarriors.conal.common.jwt.JwtProvider;
+import com.specialwarriors.conal.common.auth.jwt.JwtProvider;
+import com.specialwarriors.conal.common.auth.oauth.CustomOAuth2FailureHandler;
+import com.specialwarriors.conal.common.auth.oauth.CustomOAuth2SuccessHandler;
+import com.specialwarriors.conal.common.auth.oauth.CustomOAuth2UserService;
 import com.specialwarriors.conal.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
