@@ -1,5 +1,7 @@
-package com.specialwarriors.conal.common.jwt;
+package com.specialwarriors.conal.common.auth.jwt;
 
+import com.specialwarriors.conal.common.auth.exception.AuthException;
+import com.specialwarriors.conal.common.auth.exception.CustomAuthException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -27,8 +29,8 @@ public class JwtProvider {
                 SIG.HS256.key().build().getAlgorithm());
     }
 
-    public JwtTokenDto generateTokens(Long userId) {
-        return new JwtTokenDto(createAccessToken(userId), createRefreshToken(userId));
+    public JwtTokenResponse generateTokens(Long userId) {
+        return new JwtTokenResponse(createAccessToken(userId), createRefreshToken(userId));
     }
 
     public String createAccessToken(Long userId) {
@@ -60,11 +62,7 @@ public class JwtProvider {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
             return true;
         } catch (ExpiredJwtException e) {
-            log.info("Token is expired: {}", e.getMessage());
-            return false;
-        } catch (Exception e) {
-            log.error("Invalid token: {}", e.getMessage());
-            return false;
+            throw new CustomAuthException(AuthException.EXPIRED_TOKEN);
         }
     }
 
@@ -74,9 +72,6 @@ public class JwtProvider {
                     .parseSignedClaims(token).getPayload();
             return claims.getExpiration().before(new Date());
         } catch (ExpiredJwtException e) {
-            return true;
-        } catch (Exception e) {
-            log.error("Error checking token expiration: {}", e.getMessage());
             return true;
         }
     }
