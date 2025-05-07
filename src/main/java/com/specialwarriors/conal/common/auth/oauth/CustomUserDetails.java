@@ -1,4 +1,4 @@
-package com.specialwarriors.conal.common.auth;
+package com.specialwarriors.conal.common.auth.oauth;
 
 import java.util.Collection;
 import java.util.List;

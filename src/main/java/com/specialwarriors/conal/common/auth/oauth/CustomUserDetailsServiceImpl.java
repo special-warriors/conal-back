@@ -1,4 +1,4 @@
-package com.specialwarriors.conal.common.auth;
+package com.specialwarriors.conal.common.auth.oauth;
 
 import com.specialwarriors.conal.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

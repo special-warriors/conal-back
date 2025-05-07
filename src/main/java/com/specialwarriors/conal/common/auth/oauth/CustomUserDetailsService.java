@@ -1,4 +1,4 @@
-package com.specialwarriors.conal.common.auth;
+package com.specialwarriors.conal.common.auth.oauth;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 
