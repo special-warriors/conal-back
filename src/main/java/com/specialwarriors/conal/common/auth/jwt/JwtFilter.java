@@ -2,6 +2,8 @@ package com.specialwarriors.conal.common.auth.jwt;
 
 import com.specialwarriors.conal.common.auth.exception.AuthException;
 import com.specialwarriors.conal.common.auth.exception.CustomAuthException;
+import com.specialwarriors.conal.common.auth.jwt.domain.RefreshToken;
+import com.specialwarriors.conal.common.auth.jwt.repository.RefreshTokenRepository;
 import com.specialwarriors.conal.common.auth.oauth.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,41 +26,68 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService userDetailsService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
+    // TODO : RefreshToken Redis 마이그레이션, 리팩토링
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
+
+        log.info("[JWT] jwt 검증 시작");
+
+        // ✅ 개발 편의 모드: userId=1 강제 인증
+        if (true) {
+            log.warn("[JWT] 개발 편의 모드 - userId=1 강제 인증");
+
+            UserDetails userDetails = userDetailsService.loadUserByUserId(1L);
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, null,
+                            userDetails.getAuthorities());
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (isPermitAllPath(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-//        // ✅ 개발 편의: userId가 1이면 강제로 인증 처리
-//        if (Objects.equals(userId, 1L)) {
-//            UserDetails userDetails = userDetailsService.loadUserByUserId(1L);
-//
-//            UsernamePasswordAuthenticationToken authentication =
-//                    new UsernamePasswordAuthenticationToken(userDetails, null,
-//                            userDetails.getAuthorities());
-//
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
-//        }
+        String accessToken = resolveToken(request);
 
-        try {
-            String token = resolveToken(request);
+        if (accessToken == null) {
+            throw new CustomAuthException(AuthException.INVALID_TOKEN);
+        }
+        if (jwtProvider.validateToken(accessToken)) {
+            Long userId = jwtProvider.getUserId(accessToken);
+            UserDetails userDetails = userDetailsService.loadUserByUserId(userId);
 
-            if (jwtProvider.validateToken(token)) {
-                Long userId = jwtProvider.getUserId(token);
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, null,
+                            userDetails.getAuthorities());
 
-                UserDetails userDetails = userDetailsService.loadUserByUserId(userId);
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null,
-                                userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            filterChain.doFilter(request, response);
+        } else {
+            Long userId = jwtProvider.getUserId(accessToken);
+
+            RefreshToken savedToken = refreshTokenRepository.findRefreshTokenByUserId(userId)
+                    .orElseThrow(() -> new CustomAuthException(AuthException.INVALID_TOKEN));
+
+            if (jwtProvider.isExpired(savedToken.getRefreshToken())) {
+                response.sendRedirect("/");
+                throw new CustomAuthException(AuthException.EXPIRED_TOKEN);
             }
-        } catch (RuntimeException e) {
+            String newAccessToken = jwtProvider.createAccessToken(userId);
+            response.setHeader("Authorization", "Bearer " + newAccessToken);
+            UserDetails userDetails = userDetailsService.loadUserByUserId(userId);
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, null,
+                            userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);

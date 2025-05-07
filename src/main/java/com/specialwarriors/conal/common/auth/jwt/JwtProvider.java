@@ -1,7 +1,5 @@
 package com.specialwarriors.conal.common.auth.jwt;
 
-import com.specialwarriors.conal.common.auth.exception.AuthException;
-import com.specialwarriors.conal.common.auth.exception.CustomAuthException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -62,7 +60,7 @@ public class JwtProvider {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
             return true;
         } catch (ExpiredJwtException e) {
-            throw new CustomAuthException(AuthException.EXPIRED_TOKEN);
+            return false;
         }
     }
 
