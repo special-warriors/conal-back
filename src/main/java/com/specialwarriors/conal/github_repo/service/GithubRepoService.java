@@ -71,7 +71,7 @@ public class GithubRepoService {
     }
 
     @Transactional(readOnly = true)
-    public GithubRepoGetResponse getGithubRepo(Long userId, Long repoId) {
+    public GithubRepoGetResponse getGithubRepoInfo(Long userId, Long repoId) {
 
         GithubRepo githubRepo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repoId);
 
@@ -80,7 +80,7 @@ public class GithubRepoService {
 
 
     @Transactional(readOnly = true)
-    public GithubRepoPageResponse getGithubRepos(Long userId, int page) {
+    public GithubRepoPageResponse getGithubRepoInfos(Long userId, int page) {
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         Page<GithubRepo> resultPage = githubRepoRepositoryCustom.findGithubRepoPages(userId,
             pageable);
