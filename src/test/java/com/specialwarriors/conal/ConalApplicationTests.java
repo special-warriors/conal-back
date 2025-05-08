@@ -1,5 +1,6 @@
 package com.specialwarriors.conal;
 
+import com.specialwarriors.conal.common.auth.jwt.JwtProvider;
 import com.specialwarriors.conal.common.config.WebClientConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,9 +14,12 @@ class ConalApplicationTests {
 
     @MockitoBean
     private WebClientConfig webClientConfig;
-
+    
     @MockitoBean
     private WebClient webClient;
+
+    @MockitoBean
+    private JwtProvider jwtProvider;
 
     @Test
     void contextLoads() {

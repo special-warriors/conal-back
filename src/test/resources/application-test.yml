@@ -3,7 +3,7 @@ spring:
     activate:
       on-profile: test
 
-  datasource :
+  datasource:
     url: jdbc:h2:mem:test
     driverClassName: org.h2.Driver
     username: root
