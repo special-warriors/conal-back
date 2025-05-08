@@ -51,10 +51,10 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (isPermitAllPath(request)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+//        if (isPermitAllPath(request)) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
 
         String accessToken = resolveToken(request);
 
@@ -105,13 +105,20 @@ public class JwtFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private boolean isPermitAllPath(HttpServletRequest request) {
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
         return PERMIT_ALL_PATHS.contains(path);
     }
 
+//    private boolean isPermitAllPath(HttpServletRequest request) {
+//        String path = request.getRequestURI();
+//        return PERMIT_ALL_PATHS.contains(path);
+//    }
+
+
     // TODO : 기능 추가되면 인증 필요없는 URI 추가
     private static final List<String> PERMIT_ALL_PATHS = List.of(
-            "/"
+            "/", "/login"
     );
 }
