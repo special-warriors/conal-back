@@ -34,9 +34,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         String avatarUrl = oauth2User.getAttribute("avatar_url");
 
         User user = userRepository.findByGithubId(githubId)
-                .orElseGet(() -> {
-                    return userRepository.save(new User(githubId, username, avatarUrl));
-                });
+                .orElseGet(() -> userRepository.save(new User(githubId, username, avatarUrl)));
 
         Map<String, Object> attributes = new HashMap<>(oauth2User.getAttributes());
 
