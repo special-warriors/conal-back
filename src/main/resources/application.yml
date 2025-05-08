@@ -26,7 +26,7 @@ spring:
             client-id: ${GITHUB_CLIENT_ID}
             client-secret: ${GITHUB_CLIENT_SECRET}
             scope: read:user
-            redirect-uri: "http://localhost:8080/login/oauth2/code/github"
+            redirect-uri: ${GITHUB_REDIRECT_URI}
             client-name: GitHub
         provider:
           github:
@@ -37,8 +37,8 @@ spring:
 
   jwt:
     secret-key: ${JWT_SECRET_KEY}
-    access-token-exp: 3600000 # 60 * 60 * 1000: 1시간
-    refresh-token-exp: 604800000 # 60 * 60 * 1000 * 24 * 7L: 7일
+    access-token-exp: ${JWT_ACCESS_TOKEN_EXP}
+    refresh-token-exp: ${JWT_REFRESH_TOKEN_EXP}
 
 
 
