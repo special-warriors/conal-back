@@ -1,26 +1,21 @@
 package com.specialwarriors.conal.common.auth.exception;
 
 import com.specialwarriors.conal.common.exception.BaseException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+@RequiredArgsConstructor
 public class CustomAuthException extends RuntimeException {
 
-    private final BaseException error;
-
-    public CustomAuthException(BaseException error) {
-        super(error.getMessage());
-        this.error = error;
-    }
+    private final BaseException exception;
 
     public HttpStatus getStatus() {
-        return error.getStatus();
+
+        return exception.getStatus();
     }
 
-    public String getErrorCode() {
-        return error.getClass().getSimpleName();
-    }
+    public String getMessage() {
 
-    public String getErrorMessage() {
-        return error.getMessage();
+        return exception.getMessage();
     }
 }
