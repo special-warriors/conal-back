@@ -35,7 +35,7 @@ public class VoteService {
         final String voteReqFormat = "vote:req:%s:%s";
         String key = voteReqFormat.formatted(repoId, voteUuid);
 
-        if(redisTemplate.opsForHash().hasKey(key, userToken)) {
+        if (redisTemplate.opsForHash().hasKey(key, userToken)) {
 
             return false;
         }
