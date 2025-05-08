@@ -23,7 +23,7 @@ public class AuthService {
     public JwtTokenResponse reissueToken(String refreshToken) {
         Long userId = jwtProvider.getUserId(refreshToken);
 
-        RefreshToken savedToken = refreshTokenRepository.findRefreshTokenByUserId(userId)
+        RefreshToken savedToken = refreshTokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new CustomAuthException(AuthException.INVALID_TOKEN));
 
         if (!savedToken.getRefreshToken().equals(refreshToken)) {

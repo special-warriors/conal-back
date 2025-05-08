@@ -74,7 +74,7 @@ public class JwtFilter extends OncePerRequestFilter {
         } else {
             Long userId = jwtProvider.getUserId(accessToken);
 
-            RefreshToken savedToken = refreshTokenRepository.findRefreshTokenByUserId(userId)
+            RefreshToken savedToken = refreshTokenRepository.findByUserId(userId)
                     .orElseThrow(() -> new CustomAuthException(AuthException.INVALID_TOKEN));
 
             if (jwtProvider.isExpired(savedToken.getRefreshToken())) {
