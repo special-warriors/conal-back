@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>투표 결과</title>
+  <style>
+    /* GitHub Light 테마 기반 */
+    body {
+      font-family: 'Segoe UI', 'Noto Sans KR', Arial, sans-serif;
+      background: #f6f8fa;
+      color: #24292f;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 48px auto;
+      background: #fff;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(140, 149, 159, 0.12);
+      padding: 32px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: 1.2em;
+      letter-spacing: -.5px;
+      color: #0969da;
+      text-align: left;
+      border-bottom: 1px solid #d0d7de;
+      padding-bottom: 12px;
+    }
+
+    .total-votes {
+      font-size: 1.13rem;
+      font-weight: 500;
+      margin-bottom: 32px;
+      letter-spacing: 0.5px;
+      color: #0969da;
+    }
+
+    .chart-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .chart-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+      transition: background 0.2s;
+      border-radius: 4px;
+      padding: 4px 0;
+    }
+
+    .chart-item:hover {
+      background: #eaeef2;
+    }
+
+    .email {
+      width: 26%;
+      min-width: 110px;
+      font-weight: 500;
+      color: #57606a;
+      font-size: 1rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bar-container {
+      flex: 1;
+      margin: 0 16px;
+      position: relative;
+      height: 28px;
+      background: #eaeef2;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 #d0d7de;
+    }
+
+    .bar {
+      background: linear-gradient(90deg, #2383e2 70%, #58a6ff 100%);
+      height: 100%;
+      border-radius: 6px 0 0 6px;
+      transition: width 0.4s cubic-bezier(.48, .04, .52, .96);
+      min-width: 7%;
+      display: flex;
+      align-items: center;
+      color: #fff;
+      font-size: 0.98rem;
+      padding-left: 12px;
+      font-weight: 600;
+      box-sizing: border-box;
+      letter-spacing: 0;
+    }
+
+    .votes-label {
+      width: 76px;
+      text-align: right;
+      font-size: 0.95rem;
+      color: #57606a;
+      font-family: inherit;
+    }
+
+    .percent-label {
+      margin-left: 8px;
+      font-size: 0.93rem;
+      color: #57606a;
+      font-family: inherit;
+      opacity: .88;
+    }
+
+    .chart-footer {
+      margin-top: 36px;
+      text-align: right;
+      color: #6e7781;
+      font-size: 0.93rem;
+      letter-spacing: 0.1px;
+    }
+
+    @media (max-width: 680px) {
+      .container {
+        padding: 20px;
+      }
+
+      .chart-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .email, .votes-label, .percent-label {
+        margin-bottom: 4px;
+      }
+
+      .bar-container {
+        margin: 10px 0 4px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>투표 결과</h1>
+
+  <div class="total-votes">
+    총 투표 수: <strong th:text="${totalVotes}"></strong>
+  </div>
+
+  <ul class="chart-list">
+    <li class="chart-item" th:each="result : ${response}">
+      <span class="email" th:text="${result.email}">email</span>
+      <div class="bar-container">
+        <div class="bar"
+             th:style="'width: ' + (${result.votes} * 100.0 / ${totalVotes}) + '%;'"
+             th:text="${result.votes}">0
+        </div>
+      </div>
+      <span
+          th:text="|득표율: ${#numbers.formatDecimal(result.votes * 100.0 / totalVotes, 1, 1)}%|"></span>
+    </li>
+  </ul>
+
+  <div class="chart-footer">
+    powered by CONAL
+  </div>
+</div>
+</body>
+</html>
