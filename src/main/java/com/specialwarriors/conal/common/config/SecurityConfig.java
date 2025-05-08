@@ -1,6 +1,6 @@
 package com.specialwarriors.conal.common.config;
 
-import com.specialwarriors.conal.common.auth.jwt.JwtProvider;
+import com.specialwarriors.conal.common.auth.jwt.JwtTokenProvider;
 import com.specialwarriors.conal.common.auth.oauth.CustomOAuth2FailureHandler;
 import com.specialwarriors.conal.common.auth.oauth.CustomOAuth2SuccessHandler;
 import com.specialwarriors.conal.common.auth.oauth.CustomOAuth2UserService;
@@ -8,6 +8,7 @@ import com.specialwarriors.conal.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -23,7 +24,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 public class SecurityConfig {
 
     public final UserRepository userRepository;
-    public final JwtProvider jwtProvider;
+    public final JwtTokenProvider jwtTokenProvider;
+    public final RedisTemplate<String, String> redisTemplate;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -55,7 +57,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new CustomOAuth2SuccessHandler(jwtProvider);
+        return new CustomOAuth2SuccessHandler(jwtTokenProvider, redisTemplate);
     }
 
     @Bean
