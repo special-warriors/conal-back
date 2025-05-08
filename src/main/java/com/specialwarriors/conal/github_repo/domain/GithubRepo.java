@@ -41,7 +41,6 @@ public class GithubRepo {
     private LocalDate endDate;
 
     @OneToMany(mappedBy = "githubRepo", cascade = CascadeType.ALL)
-
     private List<Contributor> contributors = new ArrayList<>();
 
     @OneToOne(mappedBy = "githubRepo", cascade = CascadeType.ALL)
