@@ -1,6 +1,5 @@
 package com.specialwarriors.conal.common.auth.service;
 
-import com.specialwarriors.conal.common.LogService;
 import com.specialwarriors.conal.common.auth.exception.AuthException;
 import com.specialwarriors.conal.common.auth.exception.CustomAuthException;
 import com.specialwarriors.conal.common.auth.jwt.JwtProvider;
@@ -18,7 +17,6 @@ public class AuthService {
 
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final LogService logService;
 
     public JwtTokenResponse reissueToken(String refreshToken) {
         Long userId = jwtProvider.getUserId(refreshToken);
@@ -38,12 +36,12 @@ public class AuthService {
 
             savedToken.updateRefreshToken(newRefreshToken);
 
-            log.info("[{}}] accessToken과 refreshToken을 재발행했습니다", this.getClassName());
+            log.info("[{}}] accessToken과 refreshToken을 재발행했습니다", this.getClass().getSimpleName());
             return new JwtTokenResponse(newAccessToken, newRefreshToken);
         }
 
         String newAccessToken = jwtProvider.createAccessToken(userId);
-        log.info("[{}] accessToken을 재발행했습니다", logService.getClassName());
+        log.info("[{}] accessToken을 재발행했습니다", this.getClass().getSimpleName());
         return new JwtTokenResponse(newAccessToken, refreshToken);
     }
 
