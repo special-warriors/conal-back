@@ -16,6 +16,6 @@ public class UserQuery {
     public User findById(long userId) {
 
         return userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(UserException.USER_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(UserException.USER_NOT_FOUND));
     }
 }

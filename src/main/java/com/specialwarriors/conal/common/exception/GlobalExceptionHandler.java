@@ -11,6 +11,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleGeneralException(GeneralException e) {
 
         return ResponseEntity.status(e.getStatus())
-                .body(new ExceptionResponse(e.getMessage()));
+            .body(new ExceptionResponse(e.getMessage()));
     }
 }

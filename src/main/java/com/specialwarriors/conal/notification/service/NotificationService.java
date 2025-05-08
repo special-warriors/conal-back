@@ -20,16 +20,16 @@ public class NotificationService {
 
     @Transactional
     public void updateNotificationAgreement(long userId, long repositoryId,
-            NotificationAgreementUpdateRequest request) {
+        NotificationAgreementUpdateRequest request) {
 
         NotificationType notificationType = NotificationType.valueOf(request.type());
         NotificationAgreement notificationAgreement = notificationAgreementQuery
-                .findByRepositoryIdAndType(repositoryId, notificationType);
+            .findByRepositoryIdAndType(repositoryId, notificationType);
 
         // 사용자가 자신의 github repo에 접근한 것이 맞는 지 검증
         User user = userQuery.findById(userId);
         if (!user.hasGithubRepo(repositoryId)) {
-            throw new GeneralException(GithubRepoException.UNAUTHORIZED_REPO_ACCESS);
+            throw new GeneralException(GithubRepoException.UNAUTHORIZED_GITHUBREPO_ACCESS);
         }
 
         if (request.isAgree()) {
