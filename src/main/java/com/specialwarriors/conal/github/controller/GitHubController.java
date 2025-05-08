@@ -1,14 +1,13 @@
-package com.specialwarriors.conal.feat.github.controller;
+package com.specialwarriors.conal.github.controller;
 
-import com.specialwarriors.conal.feat.github.service.GitHubService;
+import com.specialwarriors.conal.github.service.GitHubService;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
-
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,12 +28,14 @@ public class GitHubController {
     }
 
     @GetMapping("repos/{username}/{repo}")
-    public Flux<Map<String, Object>> getRepo(@PathVariable String username, @PathVariable String repo) {
+    public Flux<Map<String, Object>> getRepo(@PathVariable String username,
+            @PathVariable String repo) {
         return githubService.getRepo(username, repo);
     }
 
     @GetMapping("/repos/{username}/{repo}/commits")
-    public Flux<Map<String, Object>> getCommits(@PathVariable String username, @PathVariable String repo) {
+    public Flux<Map<String, Object>> getCommits(@PathVariable String username,
+            @PathVariable String repo) {
         return githubService.getCommit(username, repo);
     }
 
