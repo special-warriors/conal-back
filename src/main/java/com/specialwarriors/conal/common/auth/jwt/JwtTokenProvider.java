@@ -14,15 +14,17 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class JwtProvider {
+public class JwtTokenProvider {
 
     private final SecretKey secretKey;
+
     @Value("${spring.jwt.access-token-exp}")
     private long accessTokenExp;
+
     @Value("${spring.jwt.refresh-token-exp}")
     private long refreshTokenExp;
 
-    public JwtProvider(@Value("${spring.jwt.secret-key}") String secret) {
+    public JwtTokenProvider(@Value("${spring.jwt.secret-key}") String secret) {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8),
                 SIG.HS256.key().build().getAlgorithm());
     }
