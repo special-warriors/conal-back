@@ -20,7 +20,6 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
                         user.getUsername()
                 ))
                 .orElseThrow(() -> new UsernameNotFoundException("NOT_FOUND_USER"));
-
     }
 
     @Override
