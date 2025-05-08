@@ -38,7 +38,7 @@ public class AuthService {
 
             savedToken.updateRefreshToken(newRefreshToken);
 
-            log.info("[{}}] accessToken과 refreshToken을 재발행했습니다", logService.getClassName());
+            log.info("[{}}] accessToken과 refreshToken을 재발행했습니다", this.getClassName());
             return new JwtTokenResponse(newAccessToken, newRefreshToken);
         }
 
