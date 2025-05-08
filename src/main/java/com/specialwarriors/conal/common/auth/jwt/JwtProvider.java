@@ -1,6 +1,5 @@
 package com.specialwarriors.conal.common.auth.jwt;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Jwts.SIG;
@@ -66,12 +65,11 @@ public class JwtProvider {
 
     public boolean isExpired(String token) {
         try {
-            Claims claims = Jwts.parser().verifyWith(secretKey).build()
-                    .parseSignedClaims(token).getPayload();
-            return claims.getExpiration().before(new Date());
+            Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
         } catch (ExpiredJwtException e) {
             return true;
         }
+        return false;
     }
 
     public Long getUserId(String token) {
