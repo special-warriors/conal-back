@@ -15,10 +15,10 @@ public class WebClientConfig {
     @Bean
     public WebClient githubWebClient() {
         return WebClient.builder()
-                .baseUrl("https://api.github.com")
-                .defaultHeader(HttpHeaders.USER_AGENT, "spring-webclient")
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + gitHubToken)
-                .build();
+            .baseUrl("https://api.github.com")
+            .defaultHeader(HttpHeaders.USER_AGENT, "spring-webclient")
+            .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + gitHubToken)
+            .build();
     }
 
 }

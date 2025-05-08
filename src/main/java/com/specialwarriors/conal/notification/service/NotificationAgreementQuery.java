@@ -15,13 +15,13 @@ public class NotificationAgreementQuery {
     private final NotificationAgreementRepository notificationAgreementRepository;
 
     public NotificationAgreement findByRepositoryIdAndType(long repositoryId,
-            NotificationType type) {
+        NotificationType type) {
 
         return notificationAgreementRepository
-                .findAllByRepositoryIdAndNotificationType(repositoryId, type)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new GeneralException(
-                        NotificationAgreementException.NOTIFICATION_AGREEMENT_NOT_FOUND));
+            .findAllByRepositoryIdAndNotificationType(repositoryId, type)
+            .stream()
+            .findFirst()
+            .orElseThrow(() -> new GeneralException(
+                NotificationAgreementException.NOTIFICATION_AGREEMENT_NOT_FOUND));
     }
 }

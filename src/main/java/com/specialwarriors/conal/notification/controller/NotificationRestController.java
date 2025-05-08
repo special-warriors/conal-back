@@ -17,8 +17,8 @@ public class NotificationRestController {
 
     @PostMapping("/users/{userId}/repositories/{repositoryId}/notifications")
     public ResponseEntity<Void> updateNotificationAgreement(@PathVariable long userId,
-            @PathVariable long repositoryId,
-            @RequestBody NotificationAgreementUpdateRequest request) {
+        @PathVariable long repositoryId,
+        @RequestBody NotificationAgreementUpdateRequest request) {
 
         notificationService.updateNotificationAgreement(userId, repositoryId, request);
 
