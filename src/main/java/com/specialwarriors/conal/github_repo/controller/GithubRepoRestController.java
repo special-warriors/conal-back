@@ -47,7 +47,6 @@ public class GithubRepoRestController {
 
         GithubRepoGetResponse response = githubRepoService.getGithubRepoInfo(userId, repositoryId);
         return Mono.just(response);
-
     }
 
     @DeleteMapping("/{repositoryId}")
