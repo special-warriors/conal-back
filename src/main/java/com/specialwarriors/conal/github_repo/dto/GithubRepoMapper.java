@@ -22,11 +22,12 @@ public interface GithubRepoMapper {
 
     GithubRepoSummary toGithubRepoSummary(GithubRepo repo);
 
-    default GithubRepoPageResponse toGithubRepoPageResponse(Page<GithubRepo> page) {
+    default GithubRepoPageResponse toGithubRepoPageResponse(Page<GithubRepo> page, Long userId) {
         return new GithubRepoPageResponse(
             page.getContent().stream()
                 .map(this::toGithubRepoSummary)
                 .toList(),
+            userId,
             page.getNumber(),
             page.getTotalPages(),
             page.getTotalElements()
