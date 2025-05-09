@@ -39,6 +39,7 @@ spring:
     secret-key: ${JWT_SECRET_KEY}
     access-token-exp: ${JWT_ACCESS_TOKEN_EXP}
     refresh-token-exp: ${JWT_REFRESH_TOKEN_EXP}
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -50,11 +51,12 @@ spring:
           starttls:
             enable: true
           auth: true
+          timeout: 5000
+        mime:
+          charset: UTF-8
 
 github:
   token: ${GITHUB_TOKEN}
-
-
 
 ---
 
