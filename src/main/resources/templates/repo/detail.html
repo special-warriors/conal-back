@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>저장소 상세 정보</title>
+</head>
+<body>
+<h1 th:text="'저장소: ' + ${repoInfo.name}"></h1>
+<p><strong>설명:</strong> <span th:text="${repoInfo.description}"></span></p>
+<p><strong>Owner:</strong> <span th:text="${repoInfo.owner}"></span></p>
+
+<form th:action="@{|/users/${repoInfo.userId}/repositories/${repoInfo.id}/delete|}" method="post">
+  <button type="submit">삭제</button>
+</form>
+
+</body>
+</html>
