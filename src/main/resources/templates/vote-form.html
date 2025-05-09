@@ -16,7 +16,7 @@
     이번 주 가장 큰 기여를 한 팀원에게 투표해주세요!
   </div>
   <form id="vote-form"
-        th:action="@{/repositories/{repoId}/votes(repoId=${repoId})}"
+        th:action="@{${voteCompleteUrl}}"
         method="post"
         style="margin:0;">
 
