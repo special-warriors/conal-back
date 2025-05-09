@@ -15,6 +15,31 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 
+  profiles:
+    active: dev
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            scope: read:user
+            redirect-uri: ${GITHUB_REDIRECT_URI}
+            client-name: GitHub
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: login
+
+  jwt:
+    secret-key: ${JWT_SECRET_KEY}
+    access-token-exp: ${JWT_ACCESS_TOKEN_EXP}
+    refresh-token-exp: ${JWT_REFRESH_TOKEN_EXP}
+
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
@@ -27,12 +52,10 @@ spring:
           timeout: 5000
           starttls:
             enable: true
-  
-  profiles:
-    active: dev
 
 github:
   token: ${GITHUB_TOKEN}
+
 ---
 
 # dev 프로필 전용 설정
