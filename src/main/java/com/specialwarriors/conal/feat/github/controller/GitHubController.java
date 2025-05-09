@@ -1,10 +1,8 @@
 package com.specialwarriors.conal.feat.github.controller;
 
-import com.specialwarriors.conal.feat.github.dto.CommitRank;
-import com.specialwarriors.conal.feat.github.dto.response.CommitCountResponse;
 import com.specialwarriors.conal.feat.github.service.GitHubService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,30 +16,28 @@ public class GitHubController {
 
     private final GitHubService githubService;
 
-
-    @GetMapping("/repos/{owner}/{repo}/commits/{username}")
-    public Mono<CommitCountResponse> getCommitCountFromCommitsApi(@PathVariable String owner,
-        @PathVariable String repo,
-        @PathVariable String username) {
-
-        return githubService.getCommitCountFromCommitsApi(owner, repo, username);
-    }
-
-    @GetMapping("/repos/{repo}/users/{username}/rank")
-    public Mono<CommitRank> getUserRank(
-        @PathVariable String repo,
-        @PathVariable String username
-    ) {
-        return githubService.getUserCommitRank(repo, username);
-    }
-
-    @PostMapping("/repos/{owner}/{repo}/users/{username}/update")
-    public Mono<Void> updateCommitRanking(
+    /**
+     * 특정 레포지토리의 contributor 목록을 저장 -> List
+     */
+    @PostMapping("/repos/{owner}/{repo}/contributors")
+    public Mono<ResponseEntity<String>> cacheContributors(
         @PathVariable String owner,
-        @PathVariable String repo,
-        @PathVariable String username
+        @PathVariable String repo
     ) {
-        return githubService.updateCommitRanking(owner, repo, username);
+        return githubService.getContributorList(owner, repo)
+            .thenReturn(ResponseEntity.ok("기여자 목록 저장 완료"));
     }
 
+    /**
+     * 전체 저장된 contributor 커밋 수 계산 → Redis 랭킹에 반영
+     */
+    @PostMapping("/repos/{owner}/{repo}/ranking")
+    public Mono<ResponseEntity<String>> updateAllContributorRanks(
+        @PathVariable String owner,
+        @PathVariable String repo
+    ) {
+        return githubService.updateAllRanks(owner, repo)
+            .thenReturn(ResponseEntity.ok("전체 랭킹 업데이트 완료"));
+    }
+    
 }
