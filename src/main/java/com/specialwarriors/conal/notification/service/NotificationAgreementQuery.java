@@ -1,6 +1,7 @@
 package com.specialwarriors.conal.notification.service;
 
 import com.specialwarriors.conal.common.exception.GeneralException;
+import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
 import com.specialwarriors.conal.notification.enums.NotificationType;
 import com.specialwarriors.conal.notification.exception.NotificationAgreementException;
@@ -14,11 +15,11 @@ public class NotificationAgreementQuery {
 
     private final NotificationAgreementRepository notificationAgreementRepository;
 
-    public NotificationAgreement findByRepositoryIdAndType(long repositoryId,
+    public NotificationAgreement findByGithubRepoAndType(GithubRepo githubRepo,
         NotificationType type) {
 
         return notificationAgreementRepository
-            .findAllByRepositoryIdAndNotificationType(repositoryId, type)
+            .findAllByGithubRepoAndNotificationType(githubRepo, type)
             .stream()
             .findFirst()
             .orElseThrow(() -> new GeneralException(
