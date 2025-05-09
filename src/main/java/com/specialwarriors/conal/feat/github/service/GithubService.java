@@ -1,6 +1,6 @@
 package com.specialwarriors.conal.feat.github.service;
 
-import com.specialwarriors.conal.feat.github.dto.Contributor;
+import com.specialwarriors.conal.feat.github.dto.GithubContributor;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +21,12 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GitHubService {
+public class GithubService {
 
     private static final int PER_PAGE = 100; // 100개씩 호출할 수 있어서 paging 사용
     private final WebClient githubWebClient;
     private final ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
-    private final Set<Contributor> contributors = new LinkedHashSet<>();
+    private final Set<GithubContributor> contributors = new LinkedHashSet<>();
 
 
     /**
@@ -81,11 +81,11 @@ public class GitHubService {
      * contributor에 contribution 기록이 있으면 가져옴
      */
     public Mono<Void> getContributorList(String owner, String repo) {
-        Mono<List<Contributor>> fetchContributors = githubWebClient.get()
+        Mono<List<GithubContributor>> fetchContributors = githubWebClient.get()
             .uri(uriBuilder -> uriBuilder.path("/repos/{owner}/{repo}/contributors")
                 .build(owner, repo))
             .retrieve()
-            .bodyToFlux(Contributor.class)
+            .bodyToFlux(GithubContributor.class)
             .collectList();
 
         Mono<Map<String, String>> loginToEmailMap = getAllCommits(owner, repo, 1, PER_PAGE)
@@ -94,18 +94,18 @@ public class GitHubService {
 
         return Mono.zip(fetchContributors, loginToEmailMap)
             .doOnNext(tuple -> {
-                List<Contributor> fetchedContributors = tuple.getT1();
+                List<GithubContributor> fetchedContributors = tuple.getT1();
                 Map<String, String> emailMap = tuple.getT2();
 
                 contributors.clear();
-                for (Contributor dto : fetchedContributors) {
+                for (GithubContributor dto : fetchedContributors) {
                     String login = dto.getLogin();
                     dto.setEmail(emailMap.getOrDefault(login, null));
                     contributors.add(dto);
                 }
 
                 log.info("{}명 : {}", contributors.size(),
-                    contributors.stream().map(Contributor::getLogin).toList());
+                    contributors.stream().map(GithubContributor::getLogin).toList());
             })
             .then();
     }
@@ -194,11 +194,11 @@ public class GitHubService {
     /**
      * commit  -> commit이 이상하다는 의견이 있어서 login(username)과 email(git) id를 합쳐서 했는데 상관없었어요
      */
-    private Map<String, Long> countCommitsByLogin(Set<Contributor> contributors,
+    private Map<String, Long> countCommitsByLogin(Set<GithubContributor> contributors,
         List<Map> commitList) {
 
         return contributors.stream()
-            .collect(Collectors.toMap(Contributor::getLogin, contributor -> {
+            .collect(Collectors.toMap(GithubContributor::getLogin, contributor -> {
                 String login = contributor.getLogin();
                 String email = contributor.getEmail();
 
