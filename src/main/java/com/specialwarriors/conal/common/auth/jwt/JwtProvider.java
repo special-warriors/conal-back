@@ -58,20 +58,16 @@ public class JwtProvider {
     }
 
     public String createVoteUserToken(String email, Date issuedAt, long expirationMillis) {
-
-        return createToken(email, issuedAt, expirationMillis);
-    }
-
-    private String createToken(Object subject, Date issuedAt, long expirationMillis) {
         Date expiration = new Date(issuedAt.getTime() + expirationMillis);
 
         return Jwts.builder()
-                .subject(String.valueOf(subject))
+                .claim("email", email)
                 .issuedAt(issuedAt)
                 .expiration(expiration)
                 .signWith(secretKey)
                 .compact();
     }
+
 
     public boolean validateToken(String token) {
         try {
@@ -94,5 +90,13 @@ public class JwtProvider {
     public Long getUserId(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
                 .get("userId", Long.class);
+    }
+
+    public String getEmailFrom(String token) {
+
+        return Jwts.parser().verifyWith(secretKey).build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("email", String.class);
     }
 }
