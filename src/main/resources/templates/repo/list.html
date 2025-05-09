@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>GitHub 저장소 목록</title>
+</head>
+<body>
+<h1>GitHub 저장소 목록</h1>
+
+<div th:if="${param.message}">
+  <p th:text="${param.message}"></p>
+</div>
+
+<!-- 레포지토리 추가 버튼 -->
+<div>
+  <a th:href="@{|/users/${repositories.userId}/repositories/new|}">
+    <button type="button">레포지토리 추가</button>
+  </a>
+</div>
+
+<hr/>
+
+<div th:if="${repositories.repositoryId != null}">
+  <ul>
+    <li th:each="repository : ${repositories.repositoryId}">
+      <span>
+        <a th:href="@{|/users/${repositories.userId}/repositories/${repository.id}|}"
+           th:text="${repository.name}">저장소 이름</a>
+      </span>
+
+      <!-- 삭제 버튼 -->
+      <form th:action="@{|/users/${userId}/repositories/${repository.id}|}"
+            method="post" style="display:inline;">
+        <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+      </form>
+    </li>
+  </ul>
+</div>
+
+<div>
+  <p>현재 페이지: <span th:text="${repositories.currentPage}"></span></p>
+</div>
+
+</body>
+</html>
