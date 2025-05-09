@@ -18,16 +18,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GithubRepo {
 
@@ -46,7 +41,6 @@ public class GithubRepo {
     private LocalDate endDate;
 
     @OneToMany(mappedBy = "githubRepo", cascade = CascadeType.ALL)
-    @Default
     private List<Contributor> contributors = new ArrayList<>();
 
     @OneToOne(mappedBy = "githubRepo", cascade = CascadeType.ALL)
@@ -55,6 +49,13 @@ public class GithubRepo {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    public GithubRepo(String name, String url, LocalDate endDate) {
+        this.name = name;
+        this.url = url;
+        this.endDate = endDate;
+        this.contributors = new ArrayList<>();
+    }
 
     //연관관계 메서드
     public void addContributors(List<Contributor> contributors) {

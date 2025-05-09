@@ -1,6 +1,7 @@
 package com.specialwarriors.conal.user.domain;
 
 import com.specialwarriors.conal.github_repo.domain.GithubRepo;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,6 +23,21 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private Long githubId;
+
+    @Column(nullable = false)
+    private String username;
+
+    @Column(nullable = false)
+    private String avatarUrl;
+
+    public User(Long githubId, String username, String avatarUrl) {
+        this.githubId = githubId;
+        this.username = username;
+        this.avatarUrl = avatarUrl;
+    }
 
     @OneToMany(mappedBy = "user")
     private List<GithubRepo> githubRepos = new ArrayList<>();

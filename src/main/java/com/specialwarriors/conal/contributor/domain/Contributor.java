@@ -10,15 +10,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Contributor {
 
@@ -34,10 +30,8 @@ public class Contributor {
     @JoinColumn(name = "github_repo_id")
     private GithubRepo githubRepo;
 
-    public static Contributor of(String email) {
-        return Contributor.builder()
-            .email(email)
-            .build();
+    public Contributor(String email) {
+        this.email = email;
     }
 
     // 연관관계 메서드
