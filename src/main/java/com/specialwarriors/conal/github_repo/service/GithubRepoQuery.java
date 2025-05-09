@@ -25,4 +25,10 @@ public class GithubRepoQuery {
 
         return githubRepo;
     }
+
+    public GithubRepo findByRepositoryId(long repositoryId) {
+
+        return githubRepoRepository.findById(repositoryId)
+                .orElseThrow(() -> new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO));
+    }
 }
