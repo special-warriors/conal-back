@@ -1,6 +1,6 @@
-package com.specialwarriors.conal.feat.github.controller;
+package com.specialwarriors.conal.github.controller;
 
-import com.specialwarriors.conal.feat.github.service.GithubService;
+import com.specialwarriors.conal.github.service.GithubService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;

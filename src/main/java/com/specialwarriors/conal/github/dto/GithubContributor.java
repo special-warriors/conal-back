@@ -1,4 +1,4 @@
-package com.specialwarriors.conal.feat.github.dto;
+package com.specialwarriors.conal.github.dto;
 
 public record GithubContributor(
 

@@ -1,6 +1,6 @@
-package com.specialwarriors.conal.feat.github.service;
+package com.specialwarriors.conal.github.service;
 
-import com.specialwarriors.conal.feat.github.dto.GithubContributor;
+import com.specialwarriors.conal.github.dto.GithubContributor;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
