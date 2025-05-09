@@ -17,6 +17,9 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 @RequiredArgsConstructor
 public class MailUtil {
 
+    @Value("${BASE_URL}")
+    private String baseUrl;
+
     @Value("${MAIL_ACCOUNT}")
     private String serviceMail;
 
@@ -29,9 +32,9 @@ public class MailUtil {
         templateModel.put("userToken", response.userToken());
         templateModel.put("emails", response.voteTargetEmails());
 
-        String submitUrl = "http://localhost:8080/repositories/%d/votes"
+        String voteCompleteUrl = baseUrl + "/repositories/%d/votes"
                 .formatted(response.repoId());
-        templateModel.put("voteCompleteUrl", submitUrl);
+        templateModel.put("voteCompleteUrl", voteCompleteUrl);
 
         Context thymeleafContext = new Context();
         thymeleafContext.setVariables(templateModel);
