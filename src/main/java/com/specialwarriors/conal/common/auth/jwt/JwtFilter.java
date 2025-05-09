@@ -102,8 +102,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String path = request.getRequestURI();
-        return PERMIT_ALL_PATHS.contains(path);
+        return true;
     }
 
     // TODO : 기능 추가되면 인증 필요없는 URI 추가

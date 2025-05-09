@@ -17,8 +17,10 @@ import org.springframework.stereotype.Component;
 public class JwtProvider {
 
     private final SecretKey secretKey;
+
     @Value("${spring.jwt.access-token-exp}")
     private long accessTokenExp;
+
     @Value("${spring.jwt.refresh-token-exp}")
     private long refreshTokenExp;
 
@@ -55,6 +57,18 @@ public class JwtProvider {
                 .compact();
     }
 
+    public String createVoteUserToken(String email, Date issuedAt, long expirationMillis) {
+        Date expiration = new Date(issuedAt.getTime() + expirationMillis);
+
+        return Jwts.builder()
+                .claim("email", email)
+                .issuedAt(issuedAt)
+                .expiration(expiration)
+                .signWith(secretKey)
+                .compact();
+    }
+
+
     public boolean validateToken(String token) {
         try {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
@@ -76,5 +90,13 @@ public class JwtProvider {
     public Long getUserId(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
                 .get("userId", Long.class);
+    }
+
+    public String getEmailFrom(String token) {
+
+        return Jwts.parser().verifyWith(secretKey).build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("email", String.class);
     }
 }
