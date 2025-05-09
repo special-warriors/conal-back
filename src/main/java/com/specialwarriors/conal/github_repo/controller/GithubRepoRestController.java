@@ -37,7 +37,7 @@ public class GithubRepoRestController {
     public Mono<GithubRepoPageResponse> getGithubRepos(@PathVariable long userId,
         @RequestParam int page) {
 
-        return Mono.fromCallable(() -> githubRepoService.getGithubRepos(userId, page))
+        return Mono.fromCallable(() -> githubRepoService.getGithubRepoInfos(userId, page))
             .subscribeOn(Schedulers.boundedElastic());
     }
 
@@ -45,9 +45,8 @@ public class GithubRepoRestController {
     public Mono<GithubRepoGetResponse> getRepositoryId(@PathVariable long userId,
         @PathVariable long repositoryId) {
 
-        GithubRepoGetResponse response = githubRepoService.getGithubRepo(userId, repositoryId);
+        GithubRepoGetResponse response = githubRepoService.getGithubRepoInfo(userId, repositoryId);
         return Mono.just(response);
-
     }
 
     @DeleteMapping("/{repositoryId}")

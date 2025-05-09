@@ -1,5 +1,6 @@
 package com.specialwarriors.conal.github_repo.service;
 
+import com.specialwarriors.conal.common.exception.GeneralException;
 import com.specialwarriors.conal.contributor.domain.Contributor;
 import com.specialwarriors.conal.contributor.repository.ContributorRepository;
 import com.specialwarriors.conal.github_repo.domain.GithubRepo;
@@ -9,6 +10,7 @@ import com.specialwarriors.conal.github_repo.dto.response.GithubRepoCreateRespon
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoDeleteResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
+import com.specialwarriors.conal.github_repo.exception.GithubRepoException;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepository;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepositoryCustom;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
@@ -59,8 +61,12 @@ public class GithubRepoService {
     }
 
     private List<Contributor> createAndSaveContributors(Set<String> emails) {
+        if (emails.isEmpty()) {
+            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBEMAIL);
+        }
+
         List<Contributor> contributors = emails.stream()
-            .map(Contributor::of).toList();
+            .map(Contributor::new).toList();
         return (List<Contributor>) contributorRepository.saveAll(contributors);
     }
 
@@ -71,16 +77,15 @@ public class GithubRepoService {
     }
 
     @Transactional(readOnly = true)
-    public GithubRepoGetResponse getGithubRepo(Long userId, Long repoId) {
+    public GithubRepoGetResponse getGithubRepoInfo(Long userId, Long repoId) {
 
         GithubRepo githubRepo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repoId);
 
         return githubRepoMapper.toGithubRepoGetResponse(githubRepo);
     }
 
-
     @Transactional(readOnly = true)
-    public GithubRepoPageResponse getGithubRepos(Long userId, int page) {
+    public GithubRepoPageResponse getGithubRepoInfos(Long userId, int page) {
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         Page<GithubRepo> resultPage = githubRepoRepositoryCustom.findGithubRepoPages(userId,
             pageable);

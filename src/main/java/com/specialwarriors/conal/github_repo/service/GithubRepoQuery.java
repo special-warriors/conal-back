@@ -13,16 +13,10 @@ public class GithubRepoQuery {
 
     private final GithubRepoRepository githubRepoRepository;
 
-    public GithubRepo findByRepositoryId(Long githubRepoId) {
-        return githubRepoRepository.findById(githubRepoId).orElseThrow(() ->
-            new GeneralException(GithubRepoException.NOTFOUND_GITHUBREPO)
-        );
-    }
-
     public GithubRepo findByUserIdAndRepositoryId(Long userId, Long repositoryId) {
 
         GithubRepo githubRepo = githubRepoRepository.findById(repositoryId).orElseThrow(() ->
-            new GeneralException(GithubRepoException.NOTFOUND_GITHUBREPO)
+            new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO)
         );
 
         if (!userId.equals(githubRepo.getUser().getId())) {
