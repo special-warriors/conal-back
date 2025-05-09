@@ -19,13 +19,13 @@ public class UserController {
     @GetMapping("/")
     public String index() {
 
-        return "index";
+        return "main/index";
     }
 
     @GetMapping("/home")
     public String home() {
 
-        return "home";
+        return "main/home";
     }
 
     @GetMapping("/login/success")
@@ -42,12 +42,12 @@ public class UserController {
 
     @GetMapping("/mypage")
     public String myPage(Model model, @SessionAttribute("userId") Long userId) {
-        
+
         User user = userService.getUserByUserId(userId);
         model.addAttribute("avatarUrl", user.getAvatarUrl());
         model.addAttribute("username", user.getUsername());
 
-        return "mypage";
+        return "user/mypage";
     }
 
 }
