@@ -6,6 +6,7 @@ import com.specialwarriors.conal.contributor.domain.Contributor;
 import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.github_repo.service.GithubRepoQuery;
 import com.specialwarriors.conal.vote.dto.request.VoteSubmitRequest;
+import com.specialwarriors.conal.vote.dto.response.VoteFormResponse;
 import com.specialwarriors.conal.vote.exception.VoteException;
 import java.time.Duration;
 import java.util.Date;
@@ -52,14 +53,35 @@ public class VoteService {
             throw new GeneralException(VoteException.VOTE_NOT_FOUND);
         }
 
-        Set<String> members = redisTemplate.opsForSet().members(voteKey);
-        if (!members.contains(userToken)) {
+        Set<String> userTokens = redisTemplate.opsForSet().members(voteKey);
+        if (!userTokens.contains(userToken)) {
             throw new GeneralException(VoteException.UNAUTHORIZED_VOTE_ACCESS);
         }
 
         GithubRepo githubRepo = githubRepoQuery.findByRepositoryId(repoId);
 
-        return githubRepo.getContributors().stream().map(Contributor::getEmail).toList();
+        return githubRepo.getContributors().stream()
+                .map(Contributor::getEmail)
+                .toList();
+    }
+
+    public List<VoteFormResponse> getVoteFormResponse(long repoId) {
+        String voteKey = VOTE_OPEN_KEY_FORMAT.formatted(repoId);
+
+        // 존재하는 투표인지 검증
+        if (!redisTemplate.hasKey(voteKey)) {
+            throw new GeneralException(VoteException.VOTE_NOT_FOUND);
+        }
+
+        Set<String> userTokens = redisTemplate.opsForSet().members(voteKey);
+        List<String> voteTargetEmails = userTokens.stream().map(jwtProvider::getEmailFrom).toList();
+
+        return userTokens.stream().map(userToken -> {
+                    String email = jwtProvider.getEmailFrom(userToken);
+
+                    return new VoteFormResponse(repoId, userToken, email, voteTargetEmails);
+                })
+                .toList();
     }
 
     public boolean saveVoteRequest(long repoId, VoteSubmitRequest request) {
