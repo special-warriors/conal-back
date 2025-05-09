@@ -1,6 +1,6 @@
 package com.specialwarriors.conal.github.dto;
 
-public record GithubContributor(
+public record GitHubContributor(
 
     String login
 ) {

@@ -1,6 +1,6 @@
 package com.specialwarriors.conal.github.controller;
 
-import com.specialwarriors.conal.github.service.GithubService;
+import com.specialwarriors.conal.github.service.GitHubService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,9 +12,9 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/github")
-public class GithubController {
+public class GitHubController {
 
-    private final GithubService githubService;
+    private final GitHubService githubService;
 
     /**
      * 특정 레포지토리의 contributor 목록을 저장 -> List

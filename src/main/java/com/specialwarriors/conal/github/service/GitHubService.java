@@ -1,6 +1,6 @@
 package com.specialwarriors.conal.github.service;
 
-import com.specialwarriors.conal.github.dto.GithubContributor;
+import com.specialwarriors.conal.github.dto.GitHubContributor;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,14 +20,14 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GithubService {
+public class GitHubService {
 
     private static final int PER_PAGE = 100;
     private static final String RANKING_KEY_PREFIX = "ranking:";
 
     private final WebClient githubWebClient;
     private final ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
-    private final Set<GithubContributor> contributors = new LinkedHashSet<>();
+    private final Set<GitHubContributor> contributors = new LinkedHashSet<>();
 
     public Mono<Void> updateAllRanks(String owner, String repo) {
 
@@ -49,7 +49,7 @@ public class GithubService {
     }
 
     private Mono<Void> updateScoreForContributor(String owner, String repo,
-        GithubContributor contributor, Map<String, Long> commitCountMap) {
+        GitHubContributor contributor, Map<String, Long> commitCountMap) {
         String username = contributor.login();
         long commitCount = commitCountMap.getOrDefault(username, 0L);
 
@@ -70,13 +70,13 @@ public class GithubService {
         return githubWebClient.get()
             .uri("/repos/{owner}/{repo}/contributors", owner, repo)
             .retrieve()
-            .bodyToFlux(GithubContributor.class)
+            .bodyToFlux(GitHubContributor.class)
             .collectList()
             .doOnNext(list -> {
                 contributors.clear();
                 contributors.addAll(list);
                 log.info("{}명: {}", contributors.size(),
-                    contributors.stream().map(GithubContributor::login).toList());
+                    contributors.stream().map(GitHubContributor::login).toList());
             })
             .then();
     }
@@ -111,12 +111,12 @@ public class GithubService {
             ).then();
     }
 
-    private Map<String, Long> countCommitsByLogin(Set<GithubContributor> contributors,
+    private Map<String, Long> countCommitsByLogin(Set<GitHubContributor> contributors,
         List<Map> commitList) {
 
         return contributors.stream()
             .collect(Collectors.toMap(
-                GithubContributor::login,
+                GitHubContributor::login,
                 contributor -> commitList.stream()
                     .filter(commit -> isCommitByAuthor(commit, contributor.login()))
                     .count()
