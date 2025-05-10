@@ -32,6 +32,7 @@ public class GithubRepoController {
         model.addAttribute("repoRequest",
             new GithubRepoCreateRequest(userId, "", "", null, Set.of()));
         model.addAttribute("userId", userId);
+
         return "repo/form";
     }
 
@@ -42,6 +43,7 @@ public class GithubRepoController {
         Model model) {
 
         GithubRepoCreateResponse response = githubRepoService.createGithubRepo(userId, request);
+
         return "redirect:/users/" + userId + "/repositories"; // templates/repo/create_result.html
     }
 
@@ -54,6 +56,7 @@ public class GithubRepoController {
         GithubRepoPageResponse response = githubRepoService.getGithubRepoInfos(userId, page);
         model.addAttribute("repositories", response);
         model.addAttribute("userId", userId);
+
         return "repo/list"; // templates/repo/list.html
     }
 
@@ -72,6 +75,7 @@ public class GithubRepoController {
         System.out.println(rankingList);
         model.addAttribute("repoInfo", response);
         model.addAttribute("rankingList", rankingList);
+
         return "repo/detail"; // templates/repo/detail.html
     }
 
