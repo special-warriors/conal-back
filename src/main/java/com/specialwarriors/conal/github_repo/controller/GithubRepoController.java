@@ -1,11 +1,13 @@
 package com.specialwarriors.conal.github_repo.controller;
 
+import com.specialwarriors.conal.github.service.GitHubService;
 import com.specialwarriors.conal.github_repo.dto.request.GithubRepoCreateRequest;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoCreateResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoDeleteResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.service.GithubRepoService;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class GithubRepoController {
 
     private final GithubRepoService githubRepoService;
+    private final GitHubService gitHubService;
 
     @GetMapping("/new")
     public String showCreateForm(@PathVariable Long userId, Model model) {
@@ -61,7 +64,14 @@ public class GithubRepoController {
         Model model) {
 
         GithubRepoGetResponse response = githubRepoService.getGithubRepoInfo(userId, repositoryId);
+
+        gitHubService.getContributorList(response.owner(), response.repo()).block();
+        gitHubService.updateAllRanks(response.owner(), response.repo()).block();
+
+        List<String> rankingList = gitHubService.getRankingWithScore(response.repo()).block();
+        System.out.println(rankingList);
         model.addAttribute("repoInfo", response);
+        model.addAttribute("rankingList", rankingList);
         return "repo/detail"; // templates/repo/detail.html
     }
 
