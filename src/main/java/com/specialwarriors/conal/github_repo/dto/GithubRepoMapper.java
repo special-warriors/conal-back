@@ -18,7 +18,18 @@ public interface GithubRepoMapper {
 
     GithubRepoCreateResponse toGithubRepoCreateResponse(GithubRepo repo);
 
-    GithubRepoGetResponse toGithubRepoGetResponse(GithubRepo repo);
+    default GithubRepoGetResponse toGithubRepoGetResponse(GithubRepo repo, String owner,
+        String reponame) {
+        return new GithubRepoGetResponse(
+            repo.getName(),
+            repo.getUrl(),
+            repo.getNotificationAgreement(),
+            repo.getEndDate(),
+            owner,
+            reponame
+        );
+    }
+
 
     GithubRepoSummary toGithubRepoSummary(GithubRepo repo);
 
