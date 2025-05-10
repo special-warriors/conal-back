@@ -1,0 +1,63 @@
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    background-color: #f9f9f9;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .container {
+    width: 50%;
+    max-width: 640px;
+    min-height: 400px;
+
+    padding: 2.5rem 2rem;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+
+    position: relative;
+  }
+
+  h1 {
+    margin-bottom: 2.5rem;
+    font-size: 1.5rem;
+  }
+
+  .github-form {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .github-button {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background-color: #333;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  .github-button:hover {
+    background-color: #000;
+  }
+</style>
+
+<div class="container">
+  <h1>GitHub 속 당신의 흔적, Conal이 찾아드립니다</h1>
+  <form action="/oauth2/authorization/github" method="get" class="github-form">
+    <button type="submit" class="github-button">기여도 분석하기</button>
+  </form>
+</div>

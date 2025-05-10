@@ -18,11 +18,13 @@ public class CustomOAuth2FailureHandler implements AuthenticationFailureHandler 
             AuthenticationException exception) throws IOException, ServletException {
 
         if (exception.getMessage().contains("redirect")) {
-            throw new CustomAuthException(AuthException.INVALID_REDIRECT_URI);
+            log.warn(new CustomAuthException(AuthException.INVALID_REDIRECT_URI).getMessage());
         } else if (exception.getMessage().contains("user cancelled")) {
-            throw new CustomAuthException(AuthException.OAUTH_USER_CANCELLED);
+            log.warn(new CustomAuthException(AuthException.OAUTH_USER_CANCELLED).getMessage());
         } else {
-            throw new CustomAuthException(AuthException.OAUTH_PROVIDER_ERROR);
+            log.warn(new CustomAuthException(AuthException.OAUTH_PROVIDER_ERROR).getMessage());
         }
+
+        response.sendRedirect("/login/failure");
     }
 }
