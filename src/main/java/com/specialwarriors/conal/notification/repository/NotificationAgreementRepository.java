@@ -1,5 +1,6 @@
 package com.specialwarriors.conal.notification.repository;
 
+import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
 import com.specialwarriors.conal.notification.enums.NotificationType;
 import java.util.List;
@@ -10,7 +11,8 @@ import org.springframework.stereotype.Repository;
 public interface NotificationAgreementRepository extends
     JpaRepository<NotificationAgreement, Long> {
 
-    List<NotificationAgreement> findAllByRepositoryIdAndNotificationType(Long githubRepo,
+    List<NotificationAgreement> findAllByGithubRepoAndNotificationType(GithubRepo githubRepo,
         NotificationType notificationType);
 
+    void deleteByGithubRepo(GithubRepo repo);
 }

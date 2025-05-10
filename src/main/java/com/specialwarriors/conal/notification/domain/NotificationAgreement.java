@@ -13,24 +13,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Table(name = "notification_agreements")
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class NotificationAgreement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private Long repositoryId;
 
     private boolean isAgree;
 
@@ -53,9 +47,7 @@ public class NotificationAgreement {
         this.githubRepo = githubRepo;
     }
 
-    public static NotificationAgreement of(NotificationType notificationType) {
-        return NotificationAgreement.builder()
-            .notificationType(notificationType)
-            .build();
+    public NotificationAgreement(NotificationType notificationType) {
+        this.notificationType = notificationType;
     }
 }

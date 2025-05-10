@@ -31,9 +31,9 @@ public class JwtFilter extends OncePerRequestFilter {
     // TODO : RefreshToken Redis 마이그레이션, 리팩토링
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
+        HttpServletResponse response,
+        FilterChain filterChain)
+        throws ServletException, IOException {
 
         log.info("[JWT] jwt 검증 시작");
 
@@ -43,8 +43,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
             UserDetails userDetails = userDetailsService.loadUserByUserId(1L);
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, null,
-                            userDetails.getAuthorities());
+                new UsernamePasswordAuthenticationToken(userDetails, null,
+                    userDetails.getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);
@@ -61,8 +61,8 @@ public class JwtFilter extends OncePerRequestFilter {
             UserDetails userDetails = userDetailsService.loadUserByUserId(userId);
 
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, null,
-                            userDetails.getAuthorities());
+                new UsernamePasswordAuthenticationToken(userDetails, null,
+                    userDetails.getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);
@@ -70,7 +70,7 @@ public class JwtFilter extends OncePerRequestFilter {
             Long userId = jwtProvider.getUserId(accessToken);
 
             RefreshToken savedToken = refreshTokenRepository.findByUserId(userId)
-                    .orElseThrow(() -> new CustomAuthException(AuthException.INVALID_TOKEN));
+                .orElseThrow(() -> new CustomAuthException(AuthException.INVALID_TOKEN));
 
             if (jwtProvider.isExpired(savedToken.getRefreshToken())) {
                 response.sendRedirect("/");
@@ -80,8 +80,8 @@ public class JwtFilter extends OncePerRequestFilter {
             response.setHeader("Authorization", "Bearer " + newAccessToken);
             UserDetails userDetails = userDetailsService.loadUserByUserId(userId);
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, null,
-                            userDetails.getAuthorities());
+                new UsernamePasswordAuthenticationToken(userDetails, null,
+                    userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
@@ -108,6 +108,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
     // TODO : 기능 추가되면 인증 필요없는 URI 추가
     private static final List<String> PERMIT_ALL_PATHS = List.of(
-            "/", "/login"
+        "/", "/login"
     );
 }

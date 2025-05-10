@@ -28,23 +28,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/oauth2/**", "/css/**", "/js/**")
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated()
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/", "/oauth2/**", "/css/**", "/js/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(oauth2UserService())
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(oauth2UserService())
-                        )
-                        .successHandler(
-                                authenticationSuccessHandler())
-                        .failureHandler(authenticationFailureHandler())
-                )
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/")
-                );
+                .successHandler(
+                    authenticationSuccessHandler())
+                .failureHandler(authenticationFailureHandler())
+            )
+            .logout(logout -> logout
+                .logoutSuccessUrl("/")
+            );
         return http.build();
     }
 

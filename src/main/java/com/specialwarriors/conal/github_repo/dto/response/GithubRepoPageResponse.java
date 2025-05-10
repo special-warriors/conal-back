@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record GithubRepoPageResponse(
-    List<GithubRepoSummary> repos,
+    List<GithubRepoSummary> repositoryId,
+    Long userId,
     int currentPage,
     int totalPages,
     long totalElements
