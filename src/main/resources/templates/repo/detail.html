@@ -1,16 +1,27 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>저장소 상세 정보</title>
+  <title>GitHub 저장소 상세 정보</title>
+  <meta charset="UTF-8">
 </head>
 <body>
-<h1 th:text="'저장소: ' + ${repoInfo.name}"></h1>
-<p><strong>설명:</strong> <span th:text="${repoInfo.description}"></span></p>
-<p><strong>Owner:</strong> <span th:text="${repoInfo.owner}"></span></p>
 
-<form th:action="@{|/users/${repoInfo.userId}/repositories/${repoInfo.id}/delete|}" method="post">
-  <button type="submit">삭제</button>
-</form>
+<h1>저장소 상세 정보</h1>
+
+<div>
+  <p><strong>이름:</strong> <span th:text="${repoInfo.name}"></span></p>
+  <p><strong>URL:</strong> <a th:href="${repoInfo.url}" th:text="${repoInfo.url}"></a></p>
+  <p><strong>종료일:</strong> <span th:text="${repoInfo.endDate}"></span></p>
+</div>
+
+<hr/>
+
+<h2>Top Contributors</h2>
+<ol>
+  <li th:each="entry : ${rankingList}" th:text="${entry}"></li>
+</ol>
+
+<a th:href="@{'/users/' + ${userId} + '/repositories'}">← 목록으로 돌아가기</a>
 
 </body>
 </html>
