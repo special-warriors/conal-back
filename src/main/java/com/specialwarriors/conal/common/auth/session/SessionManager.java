@@ -2,6 +2,7 @@ package com.specialwarriors.conal.common.auth.session;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,7 +15,9 @@ public class SessionManager {
 
     public Long getUserId(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-        return (session != null) ? (Long) session.getAttribute("userId") : null;
+
+        return (Long) Optional.ofNullable(session)
+                .map(s -> s.getAttribute("userId")).orElse(null);
     }
 
     public void clearSession(HttpServletRequest request) {
