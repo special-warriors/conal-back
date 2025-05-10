@@ -178,4 +178,14 @@ public class GitHubService {
 
         return RANKING_KEY_PREFIX + repo;
     }
+
+    public Mono<List<String>> getRankingWithScore(String repo) {
+        String key = buildRankingKey(repo);
+
+        return reactiveRedisTemplate.opsForZSet()
+            .reverseRangeWithScores(key, Range.unbounded())
+            .map(tuple -> tuple.getValue() + " (" + tuple.getScore() + ")")
+            .collectList();
+    }
+
 }
