@@ -48,14 +48,18 @@ public class GithubRepoService {
         User user = userQuery.findById(userId);
 
         List<Contributor> contributors = createAndSaveContributors(request.emails());
-        NotificationAgreement notificationAgreement = createAndSaveNotificationAgreement();
 
-        GithubRepo githubRepo = githubRepoRepository.save(
-            githubRepoMapper.toGithubRepo(request));
-
-        githubRepo.addContributors(contributors);
-        githubRepo.setNotificationAgreement(notificationAgreement);
+        GithubRepo githubRepo = githubRepoMapper.toGithubRepo(request);
         githubRepo.setUser(user);
+        githubRepo.addContributors(contributors);
+
+        githubRepo = githubRepoRepository.save(githubRepo);
+
+        NotificationAgreement agreement = notificationAgreementRepository.save(
+            new NotificationAgreement(NotificationType.VOTE));
+        agreement.setGitHubRepo(githubRepo);
+
+        githubRepo.setNotificationAgreement(agreement);
 
         return githubRepoMapper.toGithubRepoCreateResponse(githubRepo);
     }
@@ -68,12 +72,6 @@ public class GithubRepoService {
         List<Contributor> contributors = emails.stream()
             .map(Contributor::new).toList();
         return (List<Contributor>) contributorRepository.saveAll(contributors);
-    }
-
-    private NotificationAgreement createAndSaveNotificationAgreement() {
-        NotificationAgreement notificationAgreement = NotificationAgreement.of(
-            NotificationType.VOTE);
-        return notificationAgreementRepository.save(notificationAgreement);
     }
 
     @Transactional(readOnly = true)
@@ -90,13 +88,14 @@ public class GithubRepoService {
         Page<GithubRepo> resultPage = githubRepoRepositoryCustom.findGithubRepoPages(userId,
             pageable);
 
-        return githubRepoMapper.toGithubRepoPageResponse(resultPage);
+        return githubRepoMapper.toGithubRepoPageResponse(resultPage, userId);
     }
 
     @Transactional
     public GithubRepoDeleteResponse deleteRepo(Long userId, Long repositoryId) {
         GithubRepo repo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repositoryId);
-
+        contributorRepository.deleteAllByGithubRepo(repo);
+        notificationAgreementRepository.deleteByGithubRepo(repo);
         githubRepoRepository.delete(repo);
 
         return githubRepoMapper.toGithubDeleteRepoResponse();
