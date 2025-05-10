@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 public record GithubRepoCreateRequest(
+    Long UserId,
     String name,
     String url,
     LocalDate endDate,
