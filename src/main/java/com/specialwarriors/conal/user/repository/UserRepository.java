@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByGithubId(Long githubId);
+    Optional<User> findByGithubId(long githubId);
 
-    boolean existsByGithubId(Long githubId);
+    boolean existsByGithubId(long githubId);
 }

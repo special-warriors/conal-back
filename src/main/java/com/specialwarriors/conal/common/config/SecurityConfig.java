@@ -1,9 +1,10 @@
 package com.specialwarriors.conal.common.config;
 
-import com.specialwarriors.conal.common.auth.jwt.JwtProvider;
+import com.specialwarriors.conal.common.auth.oauth.CustomLogoutHandler;
 import com.specialwarriors.conal.common.auth.oauth.CustomOAuth2FailureHandler;
 import com.specialwarriors.conal.common.auth.oauth.CustomOAuth2SuccessHandler;
 import com.specialwarriors.conal.common.auth.oauth.CustomOAuth2UserService;
+import com.specialwarriors.conal.common.auth.session.SessionManager;
 import com.specialwarriors.conal.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,20 +17,21 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    public final UserRepository userRepository;
-    public final JwtProvider jwtProvider;
+    private final UserRepository userRepository;
+    private final SessionManager sessionManager;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/oauth2/**", "/css/**", "/js/**")
+                        .requestMatchers("/**", "/login/**", "/oauth2/**", "/css/**", "/js/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated()
@@ -43,6 +45,8 @@ public class SecurityConfig {
                         .failureHandler(authenticationFailureHandler())
                 )
                 .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .addLogoutHandler(logoutHandler())
                         .logoutSuccessUrl("/")
                 );
         return http.build();
@@ -55,11 +59,16 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new CustomOAuth2SuccessHandler(jwtProvider);
+        return new CustomOAuth2SuccessHandler(userRepository, sessionManager);
     }
 
     @Bean
     public AuthenticationFailureHandler authenticationFailureHandler() {
         return new CustomOAuth2FailureHandler();
+    }
+
+    @Bean
+    public LogoutHandler logoutHandler() {
+        return new CustomLogoutHandler(sessionManager);
     }
 }

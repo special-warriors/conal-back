@@ -10,6 +10,9 @@ spring:
     hibernate:
       ddl-auto: none
 
+  session:
+    store-type: redis
+
   data:
     redis:
       host: ${REDIS_HOST}
@@ -37,10 +40,11 @@ spring:
 
   jwt:
     secret-key: ${JWT_SECRET_KEY}
-    access-token-exp: ${JWT_ACCESS_TOKEN_EXP}
-    refresh-token-exp: ${JWT_REFRESH_TOKEN_EXP}
 
-
+server:
+  servlet:
+    session:
+      timeout: ${SESSION_TIMEOUT}
 
 github:
   token: ${GITHUB_TOKEN}
