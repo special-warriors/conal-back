@@ -7,8 +7,10 @@ import com.specialwarriors.conal.github_repo.dto.response.GithubRepoDeleteRespon
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.service.GithubRepoService;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -68,22 +70,25 @@ public class GithubRepoController {
 
         GithubRepoGetResponse response = githubRepoService.getGithubRepoInfo(userId, repositoryId);
 
-        gitHubService.getContributorList(response.owner(), response.repo()).block();
-        gitHubService.updateAllRanks(response.owner(), response.repo()).block();
+        List<String> contributors = gitHubService.getContributors(response.owner(), response.repo())
+            .block();
 
-        Map<String, Long> rankingList = gitHubService.getScore(response.owner(),
-            response.repo()).block();
+        Map<String, Map<String, String>> details = contributors.stream()
+            .collect(Collectors.toMap(
+                contributor -> contributor,
+                contributor -> gitHubService
+                    .getContributorDetail(response.owner(), response.repo(), contributor).block()
+            ));
 
         model.addAttribute("repoInfo", response);
-        model.addAttribute("rankingList", rankingList);
+        model.addAttribute("details", details);
 
         return "repo/detail"; // templates/repo/detail.html
     }
 
     @PostMapping("/{repositoryId}")
     public String deleteResponse(@PathVariable long userId,
-        @PathVariable long repositoryId,
-        Model model) {
+        @PathVariable long repositoryId) {
         GithubRepoDeleteResponse response = githubRepoService.deleteRepo(userId, repositoryId);
 
         return "redirect:/users/" + userId + "/repositories";

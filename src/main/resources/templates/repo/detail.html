@@ -1,31 +1,22 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <title>GitHub 저장소 상세 정보</title>
-  <meta charset="UTF-8">
-</head>
-<body>
-
-<h1>저장소 상세 정보</h1>
-
-<div>
-  <p><strong>이름:</strong> <span th:text="${repoInfo.name}"></span></p>
-  <p><strong>URL:</strong> <a th:href="${repoInfo.url}" th:text="${repoInfo.url}"></a></p>
-  <p><strong>종료일:</strong> <span th:text="${repoInfo.endDate}"></span></p>
-</div>
-
-<hr/>
-
-<h2>Top Contributors</h2>
-<ol>
-  <li th:each="entry : ${rankingList}">
-    <span th:text="${entry.key}">username</span>
-    (<span th:text="${entry.value}">score</span>점)
-  </li>
-</ol>
-
-<hr/>
-<a th:href="@{'/users/' + ${userId} + '/repositories'}">← 목록으로 돌아가기</a>
-
-</body>
-</html>
+<table>
+  <thead>
+  <tr>
+    <th>기여자</th>
+    <th>총점</th>
+    <th>PR 수</th>
+    <th>Issue 수</th>
+    <th>Commit 수</th>
+    <th>Merge된 PR 수</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="entry : ${details.entrySet()}">
+    <td th:text="${entry.key}">contributor</td>
+    <td th:text="${entry.value.total}">0</td>
+    <td th:text="${entry.value.pr}">0</td>
+    <td th:text="${entry.value.issue}">0</td>
+    <td th:text="${entry.value.commit}">0</td>
+    <td th:text="${entry.value.mpr}">0</td>
+  </tr>
+  </tbody>
+</table>
