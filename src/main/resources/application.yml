@@ -40,8 +40,6 @@ spring:
 
   jwt:
     secret-key: ${JWT_SECRET_KEY}
-#    access-token-exp: ${JWT_ACCESS_TOKEN_EXP}
-#    refresh-token-exp: ${JWT_REFRESH_TOKEN_EXP}
 
 server:
   servlet:
