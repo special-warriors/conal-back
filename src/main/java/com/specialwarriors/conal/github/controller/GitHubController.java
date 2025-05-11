@@ -16,27 +16,13 @@ public class GitHubController {
 
     private final GitHubService githubService;
 
-    /**
-     * 특정 레포지토리의 contributor 목록을 저장 -> List
-     */
-    @PostMapping("/repos/{owner}/{repo}/contributors")
-    public Mono<ResponseEntity<String>> makeGithubContributors(
-        @PathVariable String owner,
-        @PathVariable String repo
-    ) {
-        return githubService.getContributorList(owner, repo)
-            .thenReturn(ResponseEntity.ok("기여자 목록 저장 완료"));
-    }
 
-    /**
-     * 전체 저장된 contributor 커밋 수 계산 → Redis 랭킹에 반영
-     */
     @PostMapping("/repos/{owner}/{repo}/ranking")
     public Mono<ResponseEntity<String>> updateAllGithubContributorRanks(
         @PathVariable String owner,
         @PathVariable String repo
     ) {
-        return githubService.updateAllRanks(owner, repo)
+        return githubService.updateRepoRanking(owner, repo)
             .thenReturn(ResponseEntity.ok("전체 랭킹 업데이트 완료"));
     }
 
