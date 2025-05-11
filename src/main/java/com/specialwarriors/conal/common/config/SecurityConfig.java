@@ -24,8 +24,8 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    public final UserRepository userRepository;
-    public final SessionManager sessionManager;
+    private final UserRepository userRepository;
+    private final SessionManager sessionManager;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
