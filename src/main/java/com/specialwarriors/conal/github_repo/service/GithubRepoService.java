@@ -13,6 +13,7 @@ import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse
 import com.specialwarriors.conal.github_repo.exception.GithubRepoException;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepository;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepositoryCustom;
+import com.specialwarriors.conal.github_repo.util.UrlUtil;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
 import com.specialwarriors.conal.notification.enums.NotificationType;
 import com.specialwarriors.conal.notification.repository.NotificationAgreementRepository;
@@ -20,8 +21,6 @@ import com.specialwarriors.conal.user.domain.User;
 import com.specialwarriors.conal.user.service.UserQuery;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,7 +46,7 @@ public class GithubRepoService {
     @Transactional
     public GithubRepoCreateResponse createGithubRepo(Long userId, GithubRepoCreateRequest request) {
         User user = userQuery.findById(userId);
-        validateGitHubUrl(request.url());
+        UrlUtil.validateGitHubUrl(request.url());
 
         List<Contributor> contributors = createAndSaveContributors(request.emails());
 
@@ -66,14 +65,6 @@ public class GithubRepoService {
         return githubRepoMapper.toGithubRepoCreateResponse(githubRepo);
     }
 
-    private void validateGitHubUrl(String url) {
-        // GitHub 저장소 URL 형식 검증: https://github.com/{owner}/{repo}
-        String regex = "^https://github\\.com/[^/]+/[^/]+$";
-        if (!url.matches(regex)) {
-            throw new GeneralException(GithubRepoException.INVALID_URL);
-        }
-    }
-
     private List<Contributor> createAndSaveContributors(Set<String> emails) {
         if (emails.isEmpty()) {
             throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBEMAIL);
@@ -86,19 +77,11 @@ public class GithubRepoService {
 
     @Transactional(readOnly = true)
     public GithubRepoGetResponse getGithubRepoInfo(Long userId, Long repoId) {
-
         GithubRepo githubRepo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repoId);
+        String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
 
-        Pattern pattern = Pattern.compile("https://github\\.com/([^/]+)/([^/]+)");
-        Matcher matcher = pattern.matcher(githubRepo.getUrl());
-        if (matcher.find()) {
-            String owner = matcher.group(1);
-            String repo = matcher.group(2);
-
-            return githubRepoMapper.toGithubRepoGetResponse(githubRepo, owner, repo);
-        } else {
-            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO);
-        }
+        return githubRepoMapper.toGithubRepoGetResponse(githubRepo, ownerAndRepo[0],
+            ownerAndRepo[1]);
     }
 
     @Transactional(readOnly = true)
