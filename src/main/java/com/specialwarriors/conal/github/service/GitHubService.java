@@ -1,6 +1,7 @@
 package com.specialwarriors.conal.github.service;
 
 import com.specialwarriors.conal.github.dto.GitHubContributor;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class GitHubService {
                 return Flux.fromIterable(contributors)
                     .flatMap(contributor -> updateScoreForContributor(owner, repo, contributor,
                         commitCountMap))
-                    .then(saveRankingPositionsToRedis(repo));
+                    .then(saveRankingPositionsToRedis(owner, repo));
             });
     }
 
@@ -61,7 +62,7 @@ public class GitHubService {
             long totalScore = commitCount + tuple.getT1() + tuple.getT2() + tuple.getT3();
             log.info("{} commit={}, pr={}, mpr={}, issue={} total={}", username, commitCount,
                 tuple.getT1(), tuple.getT2(), tuple.getT3(), totalScore);
-            return saveToRedisRanking(buildRankingKey(repo), username, totalScore);
+            return saveToRedisRanking(buildRankingKey(owner, repo), username, totalScore);
         });
     }
 
@@ -90,9 +91,9 @@ public class GitHubService {
             .then();
     }
 
-    private Mono<Void> saveRankingPositionsToRedis(String repo) {
+    private Mono<Void> saveRankingPositionsToRedis(String owner, String repo) {
 
-        String key = buildRankingKey(repo);
+        String key = buildRankingKey(owner, repo);
 
         return reactiveRedisTemplate.opsForZSet().size(key)
             .flatMapMany(size -> reactiveRedisTemplate.opsForZSet()
@@ -102,7 +103,7 @@ public class GitHubService {
                     .thenMany(Flux.range(0, list.size())
                         .flatMap(i -> {
                             TypedTuple<String> tuple = list.get(i);
-                            String value = tuple.getValue() + ":" + (i + 1);
+                            String value = tuple.getValue();
                             return reactiveRedisTemplate.opsForZSet()
                                 .add(key, value, tuple.getScore());
                         })
@@ -174,18 +175,26 @@ public class GitHubService {
             .map(result -> ((Number) result.get("total_count")).longValue());
     }
 
-    private String buildRankingKey(String repo) {
+    private String buildRankingKey(String owner, String repo) {
 
-        return RANKING_KEY_PREFIX + repo;
+        return RANKING_KEY_PREFIX + owner + ":" + repo;
     }
 
-    public Mono<List<String>> getRankingWithScore(String repo) {
-        String key = buildRankingKey(repo);
+    public Mono<Map<String, Long>> getScore(String owner, String repo) {
+        String key = buildRankingKey(owner, repo);
 
         return reactiveRedisTemplate.opsForZSet()
             .reverseRangeWithScores(key, Range.unbounded())
-            .map(tuple -> tuple.getValue() + " (" + tuple.getScore() + ")")
-            .collectList();
+            .filter(tuple -> tuple.getValue() != null && tuple.getScore() != null)
+            .map(tuple -> Map.entry(tuple.getValue(), tuple.getScore().longValue()))
+            .collectSortedList((a, b) -> Long.compare(b.getValue(), a.getValue())) // 점수 내림차순 정렬
+            .map(entries -> {
+                Map<String, Long> sortedMap = new LinkedHashMap<>();
+                for (Map.Entry<String, Long> entry : entries) {
+                    sortedMap.put(entry.getKey(), entry.getValue());
+                }
+                return sortedMap;
+            });
     }
 
 }

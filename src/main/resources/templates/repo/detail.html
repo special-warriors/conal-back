@@ -18,9 +18,13 @@
 
 <h2>Top Contributors</h2>
 <ol>
-  <li th:each="entry : ${rankingList}" th:text="${entry}"></li>
+  <li th:each="entry : ${rankingList}">
+    <span th:text="${entry.key}">username</span>
+    (<span th:text="${entry.value}">score</span>점)
+  </li>
 </ol>
 
+<hr/>
 <a th:href="@{'/users/' + ${userId} + '/repositories'}">← 목록으로 돌아가기</a>
 
 </body>

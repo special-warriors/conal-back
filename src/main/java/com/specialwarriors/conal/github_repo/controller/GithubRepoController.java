@@ -7,7 +7,7 @@ import com.specialwarriors.conal.github_repo.dto.response.GithubRepoDeleteRespon
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.service.GithubRepoService;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -71,8 +71,9 @@ public class GithubRepoController {
         gitHubService.getContributorList(response.owner(), response.repo()).block();
         gitHubService.updateAllRanks(response.owner(), response.repo()).block();
 
-        List<String> rankingList = gitHubService.getRankingWithScore(response.repo()).block();
-        System.out.println(rankingList);
+        Map<String, Long> rankingList = gitHubService.getScore(response.owner(),
+            response.repo()).block();
+
         model.addAttribute("repoInfo", response);
         model.addAttribute("rankingList", rankingList);
 
