@@ -17,7 +17,9 @@ public class SessionManager {
         HttpSession session = request.getSession(false);
 
         return (Long) Optional.ofNullable(session)
-                .map(s -> s.getAttribute("userId")).orElse(null);
+                .map(s -> s.getAttribute("userId"))
+                .map(Long.class::cast)
+                .orElse(null);
     }
 
     public void clearSession(HttpServletRequest request) {
