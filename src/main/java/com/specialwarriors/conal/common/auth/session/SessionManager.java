@@ -16,7 +16,7 @@ public class SessionManager {
     public Long getUserId(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
 
-        return (Long) Optional.ofNullable(session)
+        return Optional.ofNullable(session)
                 .map(s -> s.getAttribute("userId"))
                 .map(Long.class::cast)
                 .orElse(null);
