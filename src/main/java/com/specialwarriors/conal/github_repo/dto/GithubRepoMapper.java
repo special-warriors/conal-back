@@ -16,7 +16,13 @@ public interface GithubRepoMapper {
 
     GithubRepo toGithubRepo(GithubRepoCreateRequest request);
 
-    GithubRepoCreateResponse toGithubRepoCreateResponse(GithubRepo repo);
+    default GithubRepoCreateResponse toGithubRepoCreateResponse(String owner,
+        String reponame) {
+        return new GithubRepoCreateResponse(
+            owner,
+            reponame
+        );
+    }
 
     default GithubRepoGetResponse toGithubRepoGetResponse(GithubRepo repo, String owner,
         String reponame) {
