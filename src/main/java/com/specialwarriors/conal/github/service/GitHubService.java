@@ -2,6 +2,7 @@ package com.specialwarriors.conal.github.service;
 
 import com.specialwarriors.conal.github.dto.GitHubContributor;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -105,6 +106,29 @@ public class GitHubService {
             .collectList()
             .flatMapMany(list -> list.size() < PER_PAGE ? Flux.fromIterable(list)
                 : Flux.fromIterable(list).concatWith(getAllCommits(owner, repo, page + 1)));
+    }
+
+    public Mono<List<Map<String, String>>> getCommits(String owner, String repo, int page) {
+        return githubWebClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/repos/{owner}/{repo}/commits")
+                .queryParam("per_page", 100)  // <-- 여기에서 고정
+                .queryParam("page", page)
+                .build(owner, repo))
+            .retrieve()
+            .bodyToFlux(Map.class)
+            .map(commit -> {
+                Map<String, String> result = new HashMap<>();
+                Map<String, Object> commitInfo = (Map<String, Object>) commit.get("commit");
+                result.put("message", (String) commitInfo.get("message"));
+                result.put("date",
+                    (String) ((Map<String, Object>) commitInfo.get("committer")).get("date"));
+
+                Map<String, Object> author = (Map<String, Object>) commit.get("author");
+                result.put("author", author != null ? (String) author.get("login") : "Unknown");
+                return result;
+            })
+            .collectList();
     }
 
     private Mono<Long> getPullRequestCount(String owner, String repo, String login) {
