@@ -32,7 +32,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             Authentication authentication) throws IOException {
 
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-        int githubId = Integer.parseInt(oauth2User.getAttribute("id").toString());
+        int githubId = oauth2User.getAttribute("id");
 
         User user = userRepository.findByGithubId(githubId)
                 .orElseThrow(() -> new GeneralException(UserException.USER_NOT_FOUND));
