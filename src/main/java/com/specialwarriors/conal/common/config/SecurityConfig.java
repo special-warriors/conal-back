@@ -9,8 +9,10 @@ import com.specialwarriors.conal.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -26,6 +28,8 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
     private final SessionManager sessionManager;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final OAuth2AuthorizedClientService authorizedClientService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -59,7 +63,8 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new CustomOAuth2SuccessHandler(userRepository, sessionManager);
+        return new CustomOAuth2SuccessHandler(userRepository, sessionManager, redisTemplate,
+                authorizedClientService);
     }
 
     @Bean

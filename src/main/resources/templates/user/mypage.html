@@ -56,10 +56,18 @@
       border-color: #c00;
     }
   </style>
+
+  <script>
+    function confirmAndDelete() {
+      if (confirm("정말 탈퇴하시겠습니까?")) {
+        document.getElementById("deleteForm").submit();
+      }
+    }
+  </script>
 </head>
 
-<body onload="fadeIn()">
-<div class="container">
+<body>
+<div class="container" id="container">
   <div class="profile-image">
     <img th:src="${avatarUrl}" alt="프로필 이미지"
          style="width: 120px; height: 120px; border-radius: 50%;"/>
@@ -73,23 +81,10 @@
     <button type="submit" class="button">알림 수신 동의/비동의</button>
   </form>
 
-  <form th:action="@{/user/withdraw}" method="post">
-    <button type="submit" class="button danger">회원탈퇴</button>
+  <form id="deleteForm" th:action="@{/user}" method="post">
+    <input type="hidden" name="_method" value="delete"/>
+    <button type="button" class="button danger" onclick="confirmAndDelete()">회원탈퇴</button>
   </form>
 </div>
-
-<script>
-  function fadeIn() {
-    document.getElementById("container").style.opacity = 1;
-  }
-
-  function fadeOutAndGo(e, url) {
-    e.preventDefault();
-    const container = document.getElementById("container");
-    container.style.opacity = 0;
-    setTimeout(() => {
-      window.location.href = url;
-    }, 400); // 트랜지션 시간과 맞춤
-  }
-</script>
 </body>
+</html>
