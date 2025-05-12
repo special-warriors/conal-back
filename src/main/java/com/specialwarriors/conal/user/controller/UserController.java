@@ -1,6 +1,5 @@
 package com.specialwarriors.conal.user.controller;
 
-import com.specialwarriors.conal.common.auth.oauth.CustomOAuth2UserService;
 import com.specialwarriors.conal.common.auth.session.SessionManager;
 import com.specialwarriors.conal.user.domain.User;
 import com.specialwarriors.conal.user.service.UserService;
@@ -20,7 +19,6 @@ public class UserController {
 
     private final UserService userService;
     private final SessionManager sessionManager;
-    private final CustomOAuth2UserService customOAuth2UserService;
 
     @GetMapping("/")
     public String index() {
