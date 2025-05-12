@@ -62,7 +62,9 @@ public class GithubRepoService {
 
         githubRepo.setNotificationAgreement(agreement);
 
-        return githubRepoMapper.toGithubRepoCreateResponse(githubRepo);
+        String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
+
+        return githubRepoMapper.toGithubRepoCreateResponse(ownerAndRepo[0], ownerAndRepo[1]);
     }
 
     private List<Contributor> createAndSaveContributors(Set<String> emails) {
