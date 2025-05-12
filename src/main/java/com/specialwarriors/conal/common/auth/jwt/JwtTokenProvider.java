@@ -1,7 +1,5 @@
 package com.specialwarriors.conal.common.auth.jwt;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Jwts.SIG;
 import java.nio.charset.StandardCharsets;
@@ -33,29 +31,6 @@ public class JwtTokenProvider {
                 .expiration(expiration)
                 .signWith(secretKey)
                 .compact();
-    }
-
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
-            return true;
-        } catch (JwtException e) {
-            return false;
-        }
-    }
-
-    public boolean isExpired(String token) {
-        try {
-            Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
-        } catch (ExpiredJwtException e) {
-            return true;
-        }
-        return false;
-    }
-
-    public Long getUserId(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
-                .get("userId", Long.class);
     }
 
     public String getEmailFrom(String token) {
