@@ -13,6 +13,7 @@ public enum AuthException implements BaseException {
     OAUTH_USER_CANCELLED(HttpStatus.UNAUTHORIZED, "사용자가 인증을 취소함"),
     USER_MAPPING_FAILED(HttpStatus.UNAUTHORIZED, "OAuth 사용자 정보를 처리할 수 없음"),
     INVALID_REDIRECT_URI(HttpStatus.UNAUTHORIZED, "리다이렉트 URI가 유효하지 않음"),
+    EMPTY_OAUTH_TOKEN(HttpStatus.UNAUTHORIZED, "ACCESS TOKEN이 비어있음"),
     NOT_EXIST_USER(HttpStatus.UNAUTHORIZED, "존재하지 않는 사용자");
 
     private final HttpStatus status;
