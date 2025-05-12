@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Table(name = "github_repos")
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -43,7 +45,7 @@ public class GithubRepo {
     @OneToMany(mappedBy = "githubRepo", cascade = CascadeType.ALL)
     private List<Contributor> contributors = new ArrayList<>();
 
-    @OneToOne(mappedBy = "githubRepo", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "githubRepo")
     private NotificationAgreement notificationAgreement;
 
     @ManyToOne(fetch = FetchType.LAZY)

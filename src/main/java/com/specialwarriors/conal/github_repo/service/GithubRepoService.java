@@ -13,6 +13,7 @@ import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse
 import com.specialwarriors.conal.github_repo.exception.GithubRepoException;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepository;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepositoryCustom;
+import com.specialwarriors.conal.github_repo.util.UrlUtil;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
 import com.specialwarriors.conal.notification.enums.NotificationType;
 import com.specialwarriors.conal.notification.repository.NotificationAgreementRepository;
@@ -40,24 +41,30 @@ public class GithubRepoService {
 
     private final UserQuery userQuery;
     private final GithubRepoQuery githubRepoQuery;
-
     private final GithubRepoMapper githubRepoMapper;
 
     @Transactional
     public GithubRepoCreateResponse createGithubRepo(Long userId, GithubRepoCreateRequest request) {
         User user = userQuery.findById(userId);
+        UrlUtil.validateGitHubUrl(request.url());
 
         List<Contributor> contributors = createAndSaveContributors(request.emails());
-        NotificationAgreement notificationAgreement = createAndSaveNotificationAgreement();
 
-        GithubRepo githubRepo = githubRepoRepository.save(
-            githubRepoMapper.toGithubRepo(request));
-
-        githubRepo.addContributors(contributors);
-        githubRepo.setNotificationAgreement(notificationAgreement);
+        GithubRepo githubRepo = githubRepoMapper.toGithubRepo(request);
         githubRepo.setUser(user);
+        githubRepo.addContributors(contributors);
 
-        return githubRepoMapper.toGithubRepoCreateResponse(githubRepo);
+        githubRepo = githubRepoRepository.save(githubRepo);
+
+        NotificationAgreement agreement = notificationAgreementRepository.save(
+            new NotificationAgreement(NotificationType.VOTE));
+        agreement.setGitHubRepo(githubRepo);
+
+        githubRepo.setNotificationAgreement(agreement);
+
+        String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
+
+        return githubRepoMapper.toGithubRepoCreateResponse(ownerAndRepo[0], ownerAndRepo[1]);
     }
 
     private List<Contributor> createAndSaveContributors(Set<String> emails) {
@@ -70,18 +77,13 @@ public class GithubRepoService {
         return (List<Contributor>) contributorRepository.saveAll(contributors);
     }
 
-    private NotificationAgreement createAndSaveNotificationAgreement() {
-        NotificationAgreement notificationAgreement = NotificationAgreement.of(
-            NotificationType.VOTE);
-        return notificationAgreementRepository.save(notificationAgreement);
-    }
-
     @Transactional(readOnly = true)
     public GithubRepoGetResponse getGithubRepoInfo(Long userId, Long repoId) {
-
         GithubRepo githubRepo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repoId);
+        String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
 
-        return githubRepoMapper.toGithubRepoGetResponse(githubRepo);
+        return githubRepoMapper.toGithubRepoGetResponse(githubRepo, ownerAndRepo[0],
+            ownerAndRepo[1]);
     }
 
     @Transactional(readOnly = true)
@@ -90,13 +92,14 @@ public class GithubRepoService {
         Page<GithubRepo> resultPage = githubRepoRepositoryCustom.findGithubRepoPages(userId,
             pageable);
 
-        return githubRepoMapper.toGithubRepoPageResponse(resultPage);
+        return githubRepoMapper.toGithubRepoPageResponse(resultPage, userId);
     }
 
     @Transactional
     public GithubRepoDeleteResponse deleteRepo(Long userId, Long repositoryId) {
         GithubRepo repo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repositoryId);
-
+        contributorRepository.deleteAllByGithubRepo(repo);
+        notificationAgreementRepository.deleteByGithubRepo(repo);
         githubRepoRepository.delete(repo);
 
         return githubRepoMapper.toGithubDeleteRepoResponse();

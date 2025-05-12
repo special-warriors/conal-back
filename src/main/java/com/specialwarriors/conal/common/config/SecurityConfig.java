@@ -53,27 +53,32 @@ public class SecurityConfig {
                         .addLogoutHandler(logoutHandler())
                         .logoutSuccessUrl("/")
                 );
+
         return http.build();
     }
 
     @Bean
     public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
+
         return new CustomOAuth2UserService(userRepository);
     }
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
+
         return new CustomOAuth2SuccessHandler(userRepository, sessionManager, redisTemplate,
                 authorizedClientService);
     }
 
     @Bean
     public AuthenticationFailureHandler authenticationFailureHandler() {
+
         return new CustomOAuth2FailureHandler();
     }
 
     @Bean
     public LogoutHandler logoutHandler() {
+
         return new CustomLogoutHandler(sessionManager);
     }
 }
