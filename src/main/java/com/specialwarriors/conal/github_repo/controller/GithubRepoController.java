@@ -7,10 +7,7 @@ import com.specialwarriors.conal.github_repo.dto.response.GithubRepoDeleteRespon
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.service.GithubRepoService;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,12 +38,11 @@ public class GithubRepoController {
     // 저장 (POST)
     @PostMapping
     public String createGitHubRepo(@PathVariable Long userId,
-        @ModelAttribute GithubRepoCreateRequest request,
-        Model model) {
-
+        @ModelAttribute GithubRepoCreateRequest request) {
         GithubRepoCreateResponse response = githubRepoService.createGithubRepo(userId, request);
+        gitHubService.updateRepoContribution(response.owner(), response.repo()).subscribe();
 
-        return "redirect:/users/" + userId + "/repositories"; // templates/repo/create_result.html
+        return "redirect:/users/" + userId + "/repositories";
     }
 
     // 목록 조회 (GET)
@@ -67,21 +63,8 @@ public class GithubRepoController {
     public String getRepositoryId(@PathVariable long userId,
         @PathVariable long repositoryId,
         Model model) {
-
         GithubRepoGetResponse response = githubRepoService.getGithubRepoInfo(userId, repositoryId);
-
-        List<String> contributors = gitHubService.getContributors(response.owner(), response.repo())
-            .block();
-
-        Map<String, Map<String, String>> details = contributors.stream()
-            .collect(Collectors.toMap(
-                contributor -> contributor,
-                contributor -> gitHubService
-                    .getContributorDetail(response.owner(), response.repo(), contributor).block()
-            ));
-
         model.addAttribute("repoInfo", response);
-        model.addAttribute("details", details);
 
         return "repo/detail"; // templates/repo/detail.html
     }
