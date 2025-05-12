@@ -1,11 +1,14 @@
 package com.specialwarriors.conal.common.auth.oauth;
 
+import com.specialwarriors.conal.common.auth.exception.AuthException;
+import com.specialwarriors.conal.common.exception.GeneralException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
@@ -19,8 +22,8 @@ public class GithubOAuth2WebClient {
 
     public void unlink(String oauthAccessToken) {
 
-        if (oauthAccessToken == null || oauthAccessToken.isBlank()) {
-            throw new IllegalArgumentException("access_token이 null이거나 비어 있습니다.");
+        if (StringUtils.hasText(oauthAccessToken)) {
+            throw new GeneralException(AuthException.EMPTY_OAUTH_TOKEN);
         }
 
         Map<String, String> body = Map.of("access_token", oauthAccessToken);
