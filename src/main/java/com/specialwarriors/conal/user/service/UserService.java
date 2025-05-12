@@ -34,7 +34,7 @@ public class UserService {
 
         githubOAuth2WebClient.unlink(oauthAccessToken);
         Optional.of(user.getGithubId())
-                .ifPresent(id -> redisTemplate.delete("github:token:" + id));
+                .ifPresent(id -> redisTemplate.unlink("github:token:" + id));
 
         userRepository.deleteById(userId);
     }
