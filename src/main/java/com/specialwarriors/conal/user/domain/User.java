@@ -24,8 +24,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long githubId;
+    private int githubId;
 
     @Column(nullable = false)
     private String username;
@@ -33,14 +32,14 @@ public class User {
     @Column(nullable = false)
     private String avatarUrl;
 
-    public User(Long githubId, String username, String avatarUrl) {
+    @OneToMany(mappedBy = "user")
+    private List<GithubRepo> githubRepos = new ArrayList<>();
+
+    public User(int githubId, String username, String avatarUrl) {
         this.githubId = githubId;
         this.username = username;
         this.avatarUrl = avatarUrl;
     }
-
-    @OneToMany(mappedBy = "user")
-    private List<GithubRepo> githubRepos = new ArrayList<>();
 
     public boolean hasGithubRepo(long repositoryId) {
 

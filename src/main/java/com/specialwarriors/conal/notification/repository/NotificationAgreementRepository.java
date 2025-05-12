@@ -14,4 +14,6 @@ public interface NotificationAgreementRepository extends JpaRepository<Notificat
             NotificationType notificationType);
 
     List<NotificationAgreement> findAllByNotificationType(NotificationType notificationType);
+
+    void deleteByGithubRepo(GithubRepo repo);
 }

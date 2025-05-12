@@ -18,10 +18,8 @@ public class NotificationAgreementQuery {
     private final GithubRepoQuery githubRepoQuery;
     private final NotificationAgreementRepository notificationAgreementRepository;
 
-    public NotificationAgreement findByRepositoryIdAndType(long repositoryId,
+    public NotificationAgreement findByGithubRepoAndType(GithubRepo githubRepo,
         NotificationType type) {
-
-        GithubRepo githubRepo = githubRepoQuery.findByRepositoryId(repositoryId);
 
         return notificationAgreementRepository
             .findAllByGithubRepoAndNotificationType(githubRepo, type)

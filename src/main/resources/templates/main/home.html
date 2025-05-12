@@ -1,0 +1,155 @@
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #f9f9f9;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 요소를 위/아래로 나눔 */
+    height: 80%; /* 또는 적절한 고정 height */
+    width: 60%; /* 🔥 넓이 늘리기 */
+    overflow-y: auto;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    text-align: center;
+  }
+
+  .header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .repo-list {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .repo-item {
+    background-color: #f8f0f8;
+    border-radius: 10px;
+    padding: 1rem;
+    position: relative;
+  }
+
+  .repo-title {
+    font-weight: bold;
+  }
+
+  .repo-time {
+    position: absolute;
+    right: 2.5rem;
+    top: 1rem;
+    color: #999;
+  }
+
+  .repo-delete {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-weight: bold;
+  }
+
+  .add-button {
+    margin-top: auto; /* 🔥 핵심! 위에서 최대한 밀림 */
+    align-self: center; /* 가운데 정렬 (선택) */
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    background-color: #fff;
+    cursor: pointer;
+  }
+
+  .mypage-button {
+    position: absolute;
+    right: 2rem;
+    top: 2rem;
+    background-color: #888;
+    color: white;
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .logout-button {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    background-color: #c0392b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 14px;
+  }
+</style>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Conal</title>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="header">
+    <h2>Repository List</h2>
+    <button class="mypage-button" onclick="location.href='/mypage'">마이페이지</button>
+  </div>
+
+  <div class="repo-list">
+    <div class="repo-item" th:each="repo : ${repositories}">
+      <div class="repo-title" th:text="${repo.name}">Name</div>
+      <div class="repo-description" th:text="${repo.description}">Supporting line text lorem
+        ipsum...
+      </div>
+      <div class="repo-time">10 min</div>
+      <form th:action="@{'/repository/delete/' + ${repo.id}}" method="post">
+        <button class="repo-delete" type="submit">x</button>
+      </form>
+    </div>
+  </div>
+
+  <form th:action="@{/repository/create}" method="get">
+    <button class="add-button" type="submit">리포지토리 추가</button>
+  </form>
+
+  <form th:action="@{/logout}" method="post" onsubmit="return confirmLogout();">
+    <button type="submit" class="logout-button">로그아웃</button>
+  </form>
+
+  <script>
+    function confirmLogout() {
+      const confirmed = confirm("정말 로그아웃을 하시겠습니까?");
+      if (confirmed) {
+        alert("로그아웃 했습니다.");
+        return true; // 🔥 실제 로그아웃 요청 발생
+      }
+      return false; // ❌ 취소하면 로그아웃 안 됨
+    }
+  </script>
+
+</div>
+</body>

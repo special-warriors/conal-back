@@ -1,7 +1,6 @@
 package com.specialwarriors.conal;
 
-import com.specialwarriors.conal.common.auth.jwt.JwtProvider;
-import com.specialwarriors.conal.common.config.WebClientConfig;
+import com.specialwarriors.conal.common.auth.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -13,13 +12,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 class ConalApplicationTests {
 
     @MockitoBean
-    private WebClientConfig webClientConfig;
-    
-    @MockitoBean
-    private WebClient webClient;
+    private WebClient githubRevokeWebClient;
 
     @MockitoBean
-    private JwtProvider jwtProvider;
+    private WebClient githubWebClient;
+
+    @MockitoBean
+    private JwtTokenProvider jwtTokenProvider;
 
     @Test
     void contextLoads() {
