@@ -1,6 +1,6 @@
 package com.specialwarriors.conal.vote.service;
 
-import com.specialwarriors.conal.common.auth.jwt.JwtProvider;
+import com.specialwarriors.conal.common.auth.jwt.JwtTokenProvider;
 import com.specialwarriors.conal.common.exception.GeneralException;
 import com.specialwarriors.conal.contributor.domain.Contributor;
 import com.specialwarriors.conal.github_repo.domain.GithubRepo;
@@ -25,7 +25,7 @@ public class VoteService {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final GithubRepoQuery githubRepoQuery;
-    private final JwtProvider jwtProvider;
+    private final JwtTokenProvider jwtProvider;
 
     public void openVote(long repoId) {
         String voteKey = VOTE_OPEN_KEY_FORMAT.formatted(repoId);
