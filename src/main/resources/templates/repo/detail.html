@@ -1,4 +1,78 @@
-<table>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>레포지토리 상세</title>
+  <meta charset="UTF-8"/>
+</head>
+<body>
+
+<h1>레포지토리 상세</h1>
+
+<div>
+  <p><strong>레포 이름:</strong> <span th:text="${repoInfo.name}">repo-name</span></p>
+  <p><strong>URL:</strong> <a th:href="${repoInfo.url}" th:text="${repoInfo.url}">repo-url</a></p>
+  <p><strong>종료일:</strong> <span th:text="${repoInfo.endDate}">end-date</span></p>
+</div>
+
+<h2>기여자 기여도</h2>
+<button onclick="refreshDetails()">기여도 업데이트</button>
+
+<script th:inline="javascript">
+  const owner = /*[[${repoInfo.owner}]]*/ "owner";
+  const repo = /*[[${repoInfo.repo}]]*/ "repo";
+
+  function refreshDetails() {
+    fetch(`/api/github/repos/${owner}/${repo}/update`, {
+      method: 'POST'
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("업데이트 실패");
+      }
+      return response.text();
+    })
+    .then(() => {
+      setTimeout(fetchDetails, 2000);
+      alert("기여도 업데이트가 완료되었습니다.");
+    })
+    .catch(err => {
+      alert("기여도 업데이트 오류: " + err.message);
+    });
+    setTimeout(() => {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = "기여도 업데이트";
+    }, 180000); // 3분 = 180,000ms
+  }
+
+  function fetchDetails() {
+    fetch(`/api/github/repos/${owner}/${repo}/details`)
+    .then(response => response.json())
+    .then(data => {
+      const tbody = document.querySelector("tbody");
+      tbody.innerHTML = "";
+
+      for (const contributor in data) {
+        const detail = data[contributor];
+        const row = `<tr>
+              <td>${contributor}</td>
+              <td>${detail.total}</td>
+              <td>${detail.pr}</td>
+              <td>${detail.issue}</td>
+              <td>${detail.commit}</td>
+              <td>${detail.mpr}</td>
+            </tr>`;
+        tbody.insertAdjacentHTML('beforeend', row);
+      }
+    })
+    .catch(err => {
+      alert("기여도 조회 실패: " + err.message);
+    });
+  }
+
+  window.onload = fetchDetails;
+</script>
+
+<table border="1">
   <thead>
   <tr>
     <th>기여자</th>
@@ -10,13 +84,9 @@
   </tr>
   </thead>
   <tbody>
-  <tr th:each="entry : ${details.entrySet()}">
-    <td th:text="${entry.key}">contributor</td>
-    <td th:text="${entry.value.total}">0</td>
-    <td th:text="${entry.value.pr}">0</td>
-    <td th:text="${entry.value.issue}">0</td>
-    <td th:text="${entry.value.commit}">0</td>
-    <td th:text="${entry.value.mpr}">0</td>
-  </tr>
+  <!-- JavaScript에서 동적으로 채움 -->
   </tbody>
 </table>
+
+</body>
+</html>
