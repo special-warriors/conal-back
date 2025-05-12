@@ -1,6 +1,6 @@
 package com.specialwarriors.conal.user.service;
 
-import com.specialwarriors.conal.common.auth.oauth.CustomOAuth2UserService;
+import com.specialwarriors.conal.common.auth.oauth.GithubOAuth2WebClient;
 import com.specialwarriors.conal.common.exception.GeneralException;
 import com.specialwarriors.conal.user.domain.User;
 import com.specialwarriors.conal.user.exception.UserException;
@@ -16,7 +16,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RedisTemplate<String, String> redisTemplate;
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final GithubOAuth2WebClient githubOAuth2WebClient;
 
     public User getUserByUserId(Long userId) {
 
@@ -29,10 +29,10 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(UserException.USER_NOT_FOUND));
 
-        String oAuthAccessToken = redisTemplate.opsForValue()
+        String oauthAccessToken = redisTemplate.opsForValue()
                 .get("github:token:" + user.getGithubId());
-        customOAuth2UserService.revokeUser(oAuthAccessToken);
 
+        githubOAuth2WebClient.unlink(oauthAccessToken);
         Optional.of(user.getGithubId())
                 .ifPresent(id -> redisTemplate.delete("github:token:" + id));
 
