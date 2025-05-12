@@ -3,11 +3,20 @@
 <head>
   <title>레포지토리 상세</title>
   <meta charset="UTF-8"/>
+  <style>
+    table {
+      width: 100%;
+    }
+
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+    }
+  </style>
 </head>
 <body>
 
 <h1>레포지토리 상세</h1>
-
 <div>
   <p><strong>레포 이름:</strong> <span th:text="${repoInfo.name}">repo-name</span></p>
   <p><strong>URL:</strong> <a th:href="${repoInfo.url}" th:text="${repoInfo.url}">repo-url</a></p>
@@ -15,16 +24,49 @@
 </div>
 
 <h2>기여자 기여도</h2>
-<button onclick="refreshDetails()">기여도 업데이트</button>
+<button id="refreshBtn" onclick="refreshDetails()">기여도 업데이트</button>
+
+<table>
+  <thead>
+  <tr>
+    <th>기여자</th>
+    <th>총점</th>
+    <th>PR 수</th>
+    <th>Issue 수</th>
+    <th>Commit 수</th>
+    <th>Merge된 PR 수</th>
+  </tr>
+  </thead>
+  <tbody id="detail-body">
+  <!-- JavaScript에서 동적으로 채움 -->
+  </tbody>
+</table>
+
+<h2>커밋 내역</h2>
+<table>
+  <thead>
+  <tr>
+    <th>커밋 메시지</th>
+    <th>작성자</th>
+    <th>작성일</th>
+  </tr>
+  </thead>
+  <tbody id="commit-body">
+  <!-- 무한스크롤로 채움 -->
+  </tbody>
+</table>
 
 <script th:inline="javascript">
   const owner = /*[[${repoInfo.owner}]]*/ "owner";
   const repo = /*[[${repoInfo.repo}]]*/ "repo";
 
+  // ===== 기여도 갱신 =====
   function refreshDetails() {
-    fetch(`/api/github/repos/${owner}/${repo}/update`, {
-      method: 'POST'
-    })
+    const refreshBtn = document.getElementById('refreshBtn');
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = "3분 후 업데이트 가능";
+
+    fetch(`/api/github/repos/${owner}/${repo}/update`, {method: 'POST'})
     .then(response => {
       if (!response.ok) {
         throw new Error("업데이트 실패");
@@ -37,56 +79,87 @@
     })
     .catch(err => {
       alert("기여도 업데이트 오류: " + err.message);
+    })
+    .finally(() => {
+      setTimeout(() => {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = "기여도 업데이트";
+      }, 180000);
     });
-    setTimeout(() => {
-      refreshBtn.disabled = false;
-      refreshBtn.textContent = "기여도 업데이트";
-    }, 180000); // 3분 = 180,000ms
   }
 
   function fetchDetails() {
     fetch(`/api/github/repos/${owner}/${repo}/details`)
     .then(response => response.json())
     .then(data => {
-      const tbody = document.querySelector("tbody");
+      const tbody = document.getElementById("detail-body");
       tbody.innerHTML = "";
-
       for (const contributor in data) {
         const detail = data[contributor];
         const row = `<tr>
-              <td>${contributor}</td>
-              <td>${detail.total}</td>
-              <td>${detail.pr}</td>
-              <td>${detail.issue}</td>
-              <td>${detail.commit}</td>
-              <td>${detail.mpr}</td>
-            </tr>`;
+            <td>${contributor}</td>
+            <td>${detail.total}</td>
+            <td>${detail.pr}</td>
+            <td>${detail.issue}</td>
+            <td>${detail.commit}</td>
+            <td>${detail.mpr}</td>
+          </tr>`;
         tbody.insertAdjacentHTML('beforeend', row);
       }
     })
-    .catch(err => {
-      alert("기여도 조회 실패: " + err.message);
+    .catch(err => alert("기여도 조회 실패: " + err.message));
+  }
+
+  // ===== 커밋 무한 스크롤 =====
+  let currentPage = 1;
+  let isLoading = false;
+  let lastPageReached = false;
+
+  function fetchCommits() {
+    if (isLoading || lastPageReached) {
+      return;
+    }
+    isLoading = true;
+
+    fetch(`/api/github/repos/${owner}/${repo}/commits?page=${currentPage}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.length === 0) {
+        lastPageReached = true;
+        return;
+      }
+
+      const tbody = document.getElementById("commit-body");
+      data.forEach(commit => {
+        const row = `<tr>
+            <td>${commit.author}</td>
+            <td>${commit.message}</td>
+            <td>${commit.date}</td>
+          </tr>`;
+        tbody.insertAdjacentHTML('beforeend', row);
+      });
+
+      currentPage++;
+    })
+    .catch(err => alert("커밋 조회 실패: " + err.message))
+    .finally(() => {
+      isLoading = false;
     });
   }
 
-  window.onload = fetchDetails;
-</script>
+  // 무한 스크롤 감지
+  window.addEventListener('scroll', () => {
+    if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 100) {
+      fetchCommits();
+    }
+  });
 
-<table border="1">
-  <thead>
-  <tr>
-    <th>기여자</th>
-    <th>총점</th>
-    <th>PR 수</th>
-    <th>Issue 수</th>
-    <th>Commit 수</th>
-    <th>Merge된 PR 수</th>
-  </tr>
-  </thead>
-  <tbody>
-  <!-- JavaScript에서 동적으로 채움 -->
-  </tbody>
-</table>
+  // 초기 호출
+  window.onload = () => {
+    fetchDetails();
+    fetchCommits();
+  };
+</script>
 
 </body>
 </html>
