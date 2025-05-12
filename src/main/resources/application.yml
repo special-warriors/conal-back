@@ -41,6 +41,21 @@ spring:
   jwt:
     secret-key: ${JWT_SECRET_KEY}
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_ACCOUNT}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+          auth: true
+          timeout: 5000
+        mime:
+          charset: UTF-8
+
 server:
   servlet:
     session:

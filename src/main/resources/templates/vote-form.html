@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>익명 투표</title>
+</head>
+<body
+    style="font-family: 'Segoe UI', 'Noto Sans KR', Arial, sans-serif; background: #f6f8fa; color: #24292f; margin: 0; padding: 0;">
+<div
+    style="max-width:640px; margin:48px auto; background:#fff; border:1px solid #d0d7de; border-radius:8px; box-shadow:0 2px 8px rgba(140,149,159,0.12); padding:32px;">
+  <h2
+      style="font-size:2rem; font-weight:600; margin-top:0; margin-bottom:1.2em; letter-spacing:-.5px; color:#0969da; border-bottom:1px solid #d0d7de; padding-bottom:12px;">
+    주간 투표
+  </h2>
+  <div style="font-size:1.13rem; color:#2383e2; margin-bottom:24px;">
+    이번 주 가장 큰 기여를 한 팀원에게 투표해주세요!
+  </div>
+  <form id="vote-form"
+        th:action="@{${voteCompleteUrl}}"
+        method="post"
+        style="margin:0;">
+
+    <input type="hidden" id="repoId" name="repoId" th:value="${repoId}">
+    <input type="hidden" id="userToken" name="userToken" th:value="${userToken}">
+
+    <div style="margin-bottom:28px;">
+      <div th:each="email : ${emails}" style="margin-bottom:12px;">
+        <label style="display:flex; align-items:center; cursor:pointer;">
+          <input type="radio" name="votedEmail" th:value="${email}" required
+                 style="margin-right:12px; accent-color:#2383e2; width:20px; height:20px;">
+          <span style="font-size:1.06rem; color:#24292f;" th:text="${email}"></span>
+        </label>
+      </div>
+    </div>
+
+    <button type="submit"
+            style="background:linear-gradient(90deg, #2383e2 70%, #58a6ff 100%);
+                   border:none; color:#fff; font-weight:600; font-size:1.08rem;
+                   padding:12px 28px; border-radius:6px;
+                   box-shadow:0 1px 4px rgba(140,149,159,0.07);
+                   cursor:pointer; transition:background .18s;">
+      투표하기
+    </button>
+
+    <p id="result-message"
+       style="color:#bf2600; font-weight:bold; font-size:1rem; margin:18px 0 0 0;"></p>
+  </form>
+  <div
+      style="margin-top:44px; text-align:right; color:#6e7781; font-size:0.93rem; letter-spacing:0.1px;">
+    powered by CONAL
+  </div>
+</div>
+</body>
+</html>
