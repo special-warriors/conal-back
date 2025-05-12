@@ -1,17 +1,14 @@
 package com.specialwarriors.conal.github.service;
 
 import com.specialwarriors.conal.github.dto.GitHubContributor;
-import java.util.LinkedHashSet;
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Range;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -23,113 +20,77 @@ import reactor.core.publisher.Mono;
 public class GitHubService {
 
     private static final int PER_PAGE = 100;
-    private static final String RANKING_KEY_PREFIX = "ranking:";
+    private static final Duration TTL = Duration.ofMinutes(35);
+    private static final String DETAIL_KEY_PREFIX = "detail:";
+    private static final String CONTRIBUTORS_KEY_PREFIX = "contributors:";
 
-    private final WebClient githubWebClient;
     private final ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
-    private final Set<GitHubContributor> contributors = new LinkedHashSet<>();
+    private final WebClient githubWebClient;
 
-    public Mono<Void> updateAllRanks(String owner, String repo) {
+    public Mono<Void> updateRepoContribution(String owner, String repo) {
+        return getContributors(owner, repo)
+            .flatMapMany(contributors -> {
+                String contributorKey = buildContributorsKey(owner, repo);
+                List<String> logins = contributors.stream()
+                    .map(GitHubContributor::login)
+                    .collect(Collectors.toList());
 
-        return getContributorList(owner, repo)
-            .then(updateTotalContributionRanking(owner, repo));
+                return reactiveRedisTemplate.delete(contributorKey)
+                    .thenMany(Flux.fromIterable(logins))
+                    .flatMap(login -> reactiveRedisTemplate.opsForList()
+                        .rightPush(contributorKey, login))
+                    .then(reactiveRedisTemplate.expire(contributorKey, TTL))
+                    .thenMany(Flux.fromIterable(contributors));
+            })
+            .flatMap(contributor -> updateContributorScore(owner, repo, contributor))
+            .then();
     }
 
-    private Mono<Void> updateTotalContributionRanking(String owner, String repo) {
-
-        return getAllCommits(owner, repo, 1)
-            .collectList()
-            .flatMap(commitList -> {
-                Map<String, Long> commitCountMap = countCommitsByLogin(contributors, commitList);
-                return Flux.fromIterable(contributors)
-                    .flatMap(contributor -> updateScoreForContributor(owner, repo, contributor,
-                        commitCountMap))
-                    .then(saveRankingPositionsToRedis(repo));
-            });
-    }
-
-    private Mono<Void> updateScoreForContributor(String owner, String repo,
-        GitHubContributor contributor, Map<String, Long> commitCountMap) {
-        String username = contributor.login();
-        long commitCount = commitCountMap.getOrDefault(username, 0L);
-
-        return Mono.zip(
-            getPullRequestCount(owner, repo, username),
-            getMergedPullRequestCount(owner, repo, username),
-            getIssueCount(owner, repo, username)
-        ).flatMap(tuple -> {
-            long totalScore = commitCount + tuple.getT1() + tuple.getT2() + tuple.getT3();
-            log.info("{} commit={}, pr={}, mpr={}, issue={} total={}", username, commitCount,
-                tuple.getT1(), tuple.getT2(), tuple.getT3(), totalScore);
-            return saveToRedisRanking(buildRankingKey(repo), username, totalScore);
-        });
-    }
-
-    public Mono<Void> getContributorList(String owner, String repo) {
-
+    private Mono<List<GitHubContributor>> getContributors(String owner, String repo) {
         return githubWebClient.get()
             .uri("/repos/{owner}/{repo}/contributors", owner, repo)
             .retrieve()
             .bodyToFlux(GitHubContributor.class)
-            .collectList()
-            .doOnNext(list -> {
-                contributors.clear();
-                contributors.addAll(list);
-                log.info("{}명: {}", contributors.size(),
-                    contributors.stream().map(GitHubContributor::login).toList());
+            .collectList();
+    }
+
+    private Mono<Void> updateContributorScore(String owner, String repo,
+        GitHubContributor contributor) {
+        String login = contributor.login();
+
+        return Mono.zip(
+            getCommitCount(owner, repo, login),
+            getPullRequestCount(owner, repo, login),
+            getMergedPullRequestCount(owner, repo, login),
+            getIssueCount(owner, repo, login)
+        ).flatMap(tuple -> {
+            long commit = tuple.getT1();
+            long pr = tuple.getT2();
+            long mpr = tuple.getT3();
+            long issue = tuple.getT4();
+            long totalScore = commit + pr + mpr + issue;
+
+            String detailKey = buildDetailKey(owner, repo, login);
+
+            return reactiveRedisTemplate.opsForHash().putAll(detailKey, Map.of(
+                    "commit", String.valueOf(commit),
+                    "pr", String.valueOf(pr),
+                    "mpr", String.valueOf(mpr),
+                    "issue", String.valueOf(issue),
+                    "total", String.valueOf(totalScore)
+                ))
+                .then(reactiveRedisTemplate.expire(detailKey, TTL));
+        }).then();
+    }
+
+    private Mono<Long> getCommitCount(String owner, String repo, String login) {
+        return getAllCommits(owner, repo, 1)
+            .filter(commit -> {
+                Map author = (Map) commit.get("author");
+
+                return author != null && login.equalsIgnoreCase((String) author.get("login"));
             })
-            .then();
-    }
-
-    private Mono<Void> saveToRedisRanking(String key, String username, long score) {
-
-        return reactiveRedisTemplate.opsForZSet()
-            .add(key, username, score)
-            .doOnSuccess(
-                result -> log.info("ZSet {} {} = {}", result ? "success" : "fail", username, score))
-            .then();
-    }
-
-    private Mono<Void> saveRankingPositionsToRedis(String repo) {
-
-        String key = buildRankingKey(repo);
-
-        return reactiveRedisTemplate.opsForZSet().size(key)
-            .flatMapMany(size -> reactiveRedisTemplate.opsForZSet()
-                .reverseRangeWithScores(key, Range.closed(0L, size - 1))
-                .collectList()
-                .flatMapMany(list -> reactiveRedisTemplate.delete(key)
-                    .thenMany(Flux.range(0, list.size())
-                        .flatMap(i -> {
-                            TypedTuple<String> tuple = list.get(i);
-                            String value = tuple.getValue() + ":" + (i + 1);
-                            return reactiveRedisTemplate.opsForZSet()
-                                .add(key, value, tuple.getScore());
-                        })
-                    )
-                )
-            ).then();
-    }
-
-    private Map<String, Long> countCommitsByLogin(Set<GitHubContributor> contributors,
-        List<Map> commitList) {
-
-        return contributors.stream()
-            .collect(Collectors.toMap(
-                GitHubContributor::login,
-                contributor -> commitList.stream()
-                    .filter(commit -> isCommitByAuthor(commit, contributor.login()))
-                    .count()
-            ));
-    }
-
-    private boolean isCommitByAuthor(Map commit, String login) {
-
-        return Optional.ofNullable(commit.get("author"))
-            .filter(a -> a instanceof Map)
-            .map(a -> (String) ((Map<?, ?>) a).get("login"))
-            .map(login::equalsIgnoreCase)
-            .orElse(false);
+            .count();
     }
 
     private Flux<Map> getAllCommits(String owner, String repo, int page) {
@@ -143,39 +104,93 @@ public class GitHubService {
             .retrieve()
             .bodyToFlux(Map.class)
             .collectList()
-            .flatMapMany(list -> list.size() < PER_PAGE
-                ? Flux.fromIterable(list)
+            .flatMapMany(list -> list.size() < PER_PAGE ? Flux.fromIterable(list)
                 : Flux.fromIterable(list).concatWith(getAllCommits(owner, repo, page + 1)));
     }
 
-    private Mono<Long> getPullRequestCount(String owner, String repo, String username) {
+    public Mono<List<Map<String, String>>> getCommits(String owner, String repo, int page) {
+        return githubWebClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/repos/{owner}/{repo}/commits")
+                .queryParam("per_page", 100)  // <-- 여기에서 고정
+                .queryParam("page", page)
+                .build(owner, repo))
+            .retrieve()
+            .bodyToFlux(Map.class)
+            .map(commit -> {
+                Map<String, String> result = new HashMap<>();
+                Map<String, Object> commitInfo = (Map<String, Object>) commit.get("commit");
+                result.put("message", (String) commitInfo.get("message"));
+                result.put("date",
+                    (String) ((Map<String, Object>) commitInfo.get("committer")).get("date"));
 
-        return queryGithubIssueCount(owner, repo, username, "type:pr");
+                Map<String, Object> author = (Map<String, Object>) commit.get("author");
+                result.put("author", author != null ? (String) author.get("login") : "Unknown");
+                return result;
+            })
+            .collectList();
     }
 
-    private Mono<Long> getMergedPullRequestCount(String owner, String repo, String username) {
+    private Mono<Long> getPullRequestCount(String owner, String repo, String login) {
 
-        return queryGithubIssueCount(owner, repo, username, "type:pr+is:merged");
+        return queryGithubIssueCount(owner, repo, login, "type:pr");
     }
 
-    private Mono<Long> getIssueCount(String owner, String repo, String username) {
+    private Mono<Long> getMergedPullRequestCount(String owner, String repo, String login) {
 
-        return queryGithubIssueCount(owner, repo, username, "type:issue");
+        return queryGithubIssueCount(owner, repo, login, "type:pr+is:merged");
     }
 
-    private Mono<Long> queryGithubIssueCount(String owner, String repo, String username,
-        String typeQuery) {
-        String query = String.format("repo:%s/%s+%s+author:%s", owner, repo, typeQuery, username);
+    private Mono<Long> getIssueCount(String owner, String repo, String login) {
+
+        return queryGithubIssueCount(owner, repo, login, "type:issue");
+    }
+
+    private Mono<Long> queryGithubIssueCount(String owner, String repo, String login,
+        String queryType) {
+        String query = String.format("repo:%s/%s+%s+author:%s", owner, repo, queryType, login);
 
         return githubWebClient.get()
             .uri(uriBuilder -> uriBuilder.path("/search/issues").queryParam("q", query).build())
             .retrieve()
             .bodyToMono(Map.class)
-            .map(result -> ((Number) result.get("total_count")).longValue());
+            .map(map -> ((Number) map.get("total_count")).longValue());
     }
 
-    private String buildRankingKey(String repo) {
+    private String buildDetailKey(String owner, String repo, String login) {
 
-        return RANKING_KEY_PREFIX + repo;
+        return DETAIL_KEY_PREFIX + owner + ":" + repo + ":" + login;
     }
+
+    private String buildContributorsKey(String owner, String repo) {
+
+        return CONTRIBUTORS_KEY_PREFIX + owner + ":" + repo;
+    }
+
+    /**
+     * owner/repo에 속한 모든 contributor 목록 가져오기
+     */
+    public Mono<List<String>> getContributorsFromRedis(String owner, String repo) {
+        String key = "contributors:" + owner + ":" + repo;
+
+        return reactiveRedisTemplate.opsForList()
+            .range(key, 0, -1)
+            .collectList();
+    }
+
+    /**
+     * 특정 contributor에 대한 상세 점수 정보 가져오기
+     */
+    public Mono<Map<String, String>> getContributorDetailFromRedis(String owner, String repo,
+        String contributor) {
+        String detailKey = "detail:" + owner + ":" + repo + ":" + contributor;
+
+        return reactiveRedisTemplate.opsForHash()
+            .entries(detailKey)
+            .collectMap(
+                e -> e.getKey().toString(),
+                e -> e.getValue().toString()
+            );
+    }
+
 }

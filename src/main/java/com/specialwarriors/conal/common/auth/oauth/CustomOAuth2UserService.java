@@ -28,13 +28,13 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuth2User oauth2User = delegate.loadUser(userRequest);
 
         // GitHub 사용자 정보 추출
-        Number idRaw = oauth2User.getAttribute("id");
-        Long githubId = idRaw.longValue();
+        int githubId = oauth2User.getAttribute("id");
         String username = oauth2User.getAttribute("login");
         String avatarUrl = oauth2User.getAttribute("avatar_url");
 
-        User user = userRepository.findByGithubId(githubId)
-                .orElseGet(() -> userRepository.save(new User(githubId, username, avatarUrl)));
+        if (!userRepository.existsByGithubId(githubId)) {
+            userRepository.save(new User(githubId, username, avatarUrl));
+        }
 
         Map<String, Object> attributes = new HashMap<>(oauth2User.getAttributes());
 
@@ -44,4 +44,5 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 "login" // GitHub에서 사용자 ID로 쓰이는 필드
         );
     }
+
 }

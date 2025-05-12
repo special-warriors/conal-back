@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>마이페이지</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background-color: #f9f9f9;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 400px;
+      background-color: white;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+
+    .profile-image {
+      width: 120px;
+      height: 120px;
+      background-color: #555;
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+    }
+
+    .github-id {
+      font-size: 16px;
+      color: #444;
+    }
+
+    .github-id b {
+      margin-left: 8px;
+    }
+
+    .button {
+      margin-top: 1.5rem;
+      padding: 0.5rem 1.2rem;
+      border: 1px solid #aaa;
+      border-radius: 8px;
+      background-color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .button.danger {
+      margin-top: 1rem;
+      color: #c00;
+      border-color: #c00;
+    }
+  </style>
+
+  <script>
+    function confirmAndDelete() {
+      if (confirm("정말 탈퇴하시겠습니까?")) {
+        document.getElementById("deleteForm").submit();
+      }
+    }
+  </script>
+</head>
+
+<body>
+<div class="container" id="container">
+  <div class="profile-image">
+    <img th:src="${avatarUrl}" alt="프로필 이미지"
+         style="width: 120px; height: 120px; border-radius: 50%;"/>
+  </div>
+
+  <div class="github-id">
+    깃허브 아이디 <b th:text="'@' + ${username}">@username</b>
+  </div>
+
+  <form th:action="@{/user/notification-toggle}" method="post">
+    <button type="submit" class="button">알림 수신 동의/비동의</button>
+  </form>
+
+  <form id="deleteForm" th:action="@{/user}" method="post">
+    <input type="hidden" name="_method" value="delete"/>
+    <button type="button" class="button danger" onclick="confirmAndDelete()">회원탈퇴</button>
+  </form>
+</div>
+</body>
+</html>

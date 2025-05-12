@@ -3,7 +3,7 @@ spring:
     activate:
       on-profile: test
 
-  datasource :
+  datasource:
     url: jdbc:h2:mem:test
     driverClassName: org.h2.Driver
     username: root
@@ -17,3 +17,19 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: test-client-id
+            client-secret: test-client-secret
+
+github:
+  token: dummy-token-for-test
+
+server:
+  servlet:
+    session:
+      timeout: 1h

@@ -16,17 +16,35 @@ public interface GithubRepoMapper {
 
     GithubRepo toGithubRepo(GithubRepoCreateRequest request);
 
-    GithubRepoCreateResponse toGithubRepoCreateResponse(GithubRepo repo);
+    default GithubRepoCreateResponse toGithubRepoCreateResponse(String owner,
+        String reponame) {
+        return new GithubRepoCreateResponse(
+            owner,
+            reponame
+        );
+    }
 
-    GithubRepoGetResponse toGithubRepoGetResponse(GithubRepo repo);
+    default GithubRepoGetResponse toGithubRepoGetResponse(GithubRepo repo, String owner,
+        String reponame) {
+        return new GithubRepoGetResponse(
+            repo.getName(),
+            repo.getUrl(),
+            repo.getNotificationAgreement(),
+            repo.getEndDate(),
+            owner,
+            reponame
+        );
+    }
+
 
     GithubRepoSummary toGithubRepoSummary(GithubRepo repo);
 
-    default GithubRepoPageResponse toGithubRepoPageResponse(Page<GithubRepo> page) {
+    default GithubRepoPageResponse toGithubRepoPageResponse(Page<GithubRepo> page, Long userId) {
         return new GithubRepoPageResponse(
             page.getContent().stream()
                 .map(this::toGithubRepoSummary)
                 .toList(),
+            userId,
             page.getNumber(),
             page.getTotalPages(),
             page.getTotalElements()
