@@ -23,6 +23,18 @@
   <p><strong>종료일:</strong> <span th:text="${repoInfo.endDate}">end-date</span></p>
 </div>
 
+<!-- 🔔 알림 설정 -->
+<h2>알림 설정</h2>
+<label>
+  <input type="checkbox" id="vote-checkbox" onchange="toggleNotification('VOTE')"/>
+  투표 알림
+</label><br/>
+<label>
+  <input type="checkbox" id="contribution-checkbox" onchange="toggleNotification('CONTRIBUTION')"/>
+  기여도 알림
+</label><br/><br/>
+
+<!-- 📊 기여자 기여도 -->
 <h2>기여자 기여도</h2>
 <button id="refreshBtn" onclick="refreshDetails()">기여도 업데이트</button>
 
@@ -42,25 +54,71 @@
   </tbody>
 </table>
 
-<h2>커밋 내역</h2>
-<table>
-  <thead>
-  <tr>
-    <th>커밋 메시지</th>
-    <th>작성자</th>
-    <th>작성일</th>
-  </tr>
-  </thead>
-  <tbody id="commit-body">
-  <!-- 무한스크롤로 채움 -->
-  </tbody>
-</table>
-
 <script th:inline="javascript">
   const owner = /*[[${repoInfo.owner}]]*/ "owner";
   const repo = /*[[${repoInfo.repo}]]*/ "repo";
+  const userId = /*[[${repoInfo.userId}]]*/ 1;
+  const repoId = /*[[${repoInfo.repoId}]]*/ 2;
 
-  // ===== 기여도 갱신 =====
+  // 알림 상태 불러오기 (초기 세팅용)
+  function loadNotificationStatus() {
+    fetch(`/users/${userId}/repositories/${repoId}/notifications/status`)
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('vote-checkbox').checked = data.vote;
+      document.getElementById('contribution-checkbox').checked = data.contribution;
+    })
+    .catch(err => alert("알림 상태 불러오기 실패: " + err.message));
+  }
+
+  // 알림 상태 변경 요청
+  function toggleNotification(type) {
+    const isChecked = document.getElementById(
+        type === 'VOTE' ? 'vote-checkbox' : 'contribution-checkbox'
+    ).checked;
+
+    fetch(`/users/${userId}/repositories/${repoId}/notifications`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        type: type,
+        isAgree: isChecked
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("알림 설정 실패");
+      }
+    })
+    .catch(err => alert("알림 설정 오류: " + err.message));
+  }
+
+  // 기여도 정보 조회
+  function fetchDetails() {
+    fetch(`/api/github/repos/${owner}/${repo}/details`)
+    .then(response => response.json())
+    .then(data => {
+      const tbody = document.getElementById("detail-body");
+      tbody.innerHTML = "";
+      for (const contributor in data) {
+        const detail = data[contributor];
+        const row = `<tr>
+            <td>${contributor}</td>
+            <td>${detail.total}</td>
+            <td>${detail.pr}</td>
+            <td>${detail.issue}</td>
+            <td>${detail.commit}</td>
+            <td>${detail.mpr}</td>
+          </tr>`;
+        tbody.insertAdjacentHTML('beforeend', row);
+      }
+    })
+    .catch(err => alert("기여도 조회 실패: " + err.message));
+  }
+
+  // 기여도 갱신
   function refreshDetails() {
     const refreshBtn = document.getElementById('refreshBtn');
     refreshBtn.disabled = true;
@@ -88,76 +146,10 @@
     });
   }
 
-  function fetchDetails() {
-    fetch(`/api/github/repos/${owner}/${repo}/details`)
-    .then(response => response.json())
-    .then(data => {
-      const tbody = document.getElementById("detail-body");
-      tbody.innerHTML = "";
-      for (const contributor in data) {
-        const detail = data[contributor];
-        const row = `<tr>
-            <td>${contributor}</td>
-            <td>${detail.total}</td>
-            <td>${detail.pr}</td>
-            <td>${detail.issue}</td>
-            <td>${detail.commit}</td>
-            <td>${detail.mpr}</td>
-          </tr>`;
-        tbody.insertAdjacentHTML('beforeend', row);
-      }
-    })
-    .catch(err => alert("기여도 조회 실패: " + err.message));
-  }
-
-  // ===== 커밋 무한 스크롤 =====
-  let currentPage = 1;
-  let isLoading = false;
-  let lastPageReached = false;
-
-  function fetchCommits() {
-    if (isLoading || lastPageReached) {
-      return;
-    }
-    isLoading = true;
-
-    fetch(`/api/github/repos/${owner}/${repo}/commits?page=${currentPage}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.length === 0) {
-        lastPageReached = true;
-        return;
-      }
-
-      const tbody = document.getElementById("commit-body");
-      data.forEach(commit => {
-        const row = `<tr>
-            <td>${commit.author}</td>
-            <td>${commit.message}</td>
-            <td>${commit.date}</td>
-          </tr>`;
-        tbody.insertAdjacentHTML('beforeend', row);
-      });
-
-      currentPage++;
-    })
-    .catch(err => alert("커밋 조회 실패: " + err.message))
-    .finally(() => {
-      isLoading = false;
-    });
-  }
-
-  // 무한 스크롤 감지
-  window.addEventListener('scroll', () => {
-    if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 100) {
-      fetchCommits();
-    }
-  });
-
-  // 초기 호출
+  // 초기 실행
   window.onload = () => {
     fetchDetails();
-    fetchCommits();
+    loadNotificationStatus();
   };
 </script>
 
