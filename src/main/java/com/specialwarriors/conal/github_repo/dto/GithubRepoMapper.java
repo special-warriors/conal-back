@@ -29,7 +29,7 @@ public interface GithubRepoMapper {
         return new GithubRepoGetResponse(
             repo.getName(),
             repo.getUrl(),
-            repo.getNotificationAgreement(),
+            repo.getNotificationAgreements(),
             repo.getEndDate(),
             owner,
             reponame
