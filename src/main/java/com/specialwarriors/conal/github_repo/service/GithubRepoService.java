@@ -93,7 +93,7 @@ public class GithubRepoService {
         String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
 
         return githubRepoMapper.toGithubRepoGetResponse(githubRepo, ownerAndRepo[0],
-            ownerAndRepo[1]);
+            ownerAndRepo[1], userId);
     }
 
     @Transactional(readOnly = true)
