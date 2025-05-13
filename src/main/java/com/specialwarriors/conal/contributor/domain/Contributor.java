@@ -22,7 +22,6 @@ public class Contributor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "contributor_id")
     private Long id;
 
     @Column(nullable = false)

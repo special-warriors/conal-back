@@ -29,7 +29,6 @@ public class GithubRepo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "github_repo_id")
     private Long id;
 
     @Column(nullable = false)
