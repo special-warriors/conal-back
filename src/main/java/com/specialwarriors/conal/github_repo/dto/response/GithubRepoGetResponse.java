@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record GithubRepoGetResponse(
+    Long userId,
+    Long repoId,
     String name,
     String url,
     List<NotificationAgreement> agreement,
