@@ -30,7 +30,7 @@ public class GithubRepoController {
     @GetMapping("/new")
     public String showCreateForm(@SessionAttribute Long userId, Model model) {
         model.addAttribute("repoRequest",
-                new GithubRepoCreateRequest(userId, "", "", null, Set.of()));
+            new GithubRepoCreateRequest("", "", null, Set.of()));
         model.addAttribute("userId", userId);
 
         return "repo/form";
@@ -39,7 +39,7 @@ public class GithubRepoController {
     // 저장 (POST)
     @PostMapping
     public String createGitHubRepo(@SessionAttribute Long userId,
-            @ModelAttribute GithubRepoCreateRequest request) {
+        @ModelAttribute GithubRepoCreateRequest request) {
         GithubRepoCreateResponse response = githubRepoService.createGithubRepo(userId, request);
         gitHubService.updateRepoContribution(response.owner(), response.repo()).subscribe();
 
@@ -49,8 +49,8 @@ public class GithubRepoController {
     // 목록 조회 (GET)
     @GetMapping
     public String getGithubRepos(@SessionAttribute Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            Model model) {
+        @RequestParam(defaultValue = "0") int page,
+        Model model) {
 
         GithubRepoPageResponse response = githubRepoService.getGithubRepoInfos(userId, page);
         model.addAttribute("repositories", response);
@@ -62,8 +62,8 @@ public class GithubRepoController {
     // 단일 조회 (GET)
     @GetMapping("/{repositoryId}")
     public String getRepositoryId(@SessionAttribute Long userId,
-            @PathVariable long repositoryId,
-            Model model) {
+        @PathVariable long repositoryId,
+        Model model) {
         GithubRepoGetResponse response = githubRepoService.getGithubRepoInfo(userId, repositoryId);
         model.addAttribute("repoInfo", response);
 
@@ -72,7 +72,7 @@ public class GithubRepoController {
 
     @PostMapping("/{repositoryId}")
     public String deleteRepository(@SessionAttribute Long userId,
-            @PathVariable long repositoryId) {
+        @PathVariable long repositoryId) {
         GithubRepoDeleteResponse response = githubRepoService.deleteRepo(userId, repositoryId);
 
         return "redirect:/home";
