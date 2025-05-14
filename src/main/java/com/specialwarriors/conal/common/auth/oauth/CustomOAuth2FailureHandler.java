@@ -1,7 +1,7 @@
 package com.specialwarriors.conal.common.auth.oauth;
 
 import com.specialwarriors.conal.common.auth.exception.AuthException;
-import com.specialwarriors.conal.common.auth.exception.CustomAuthException;
+import com.specialwarriors.conal.common.exception.GeneralException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,11 +18,11 @@ public class CustomOAuth2FailureHandler implements AuthenticationFailureHandler 
             AuthenticationException exception) throws IOException, ServletException {
 
         if (exception.getMessage().contains("redirect")) {
-            log.warn(new CustomAuthException(AuthException.INVALID_REDIRECT_URI).getMessage());
+            log.warn(new GeneralException(AuthException.INVALID_REDIRECT_URI).getMessage());
         } else if (exception.getMessage().contains("user cancelled")) {
-            log.warn(new CustomAuthException(AuthException.OAUTH_USER_CANCELLED).getMessage());
+            log.warn(new GeneralException(AuthException.OAUTH_USER_CANCELLED).getMessage());
         } else {
-            log.warn(new CustomAuthException(AuthException.OAUTH_PROVIDER_ERROR).getMessage());
+            log.warn(new GeneralException(AuthException.OAUTH_PROVIDER_ERROR).getMessage());
         }
 
         response.sendRedirect("/login/failure");
