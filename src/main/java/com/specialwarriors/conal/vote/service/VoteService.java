@@ -7,10 +7,14 @@ import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.github_repo.service.GithubRepoQuery;
 import com.specialwarriors.conal.vote.dto.request.VoteSubmitRequest;
 import com.specialwarriors.conal.vote.dto.response.VoteFormResponse;
+import com.specialwarriors.conal.vote.dto.response.VoteResultItem;
+import com.specialwarriors.conal.vote.dto.response.VoteResultResponse;
 import com.specialwarriors.conal.vote.exception.VoteException;
+import io.jsonwebtoken.lang.Collections;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -115,10 +119,31 @@ public class VoteService {
 
     public void saveVoteResult(long repoId, VoteSubmitRequest request) {
         final String votedEmail = request.votedEmail();
-        final String voteResFormat = "vote:res:%s:%s";
-        String key = voteResFormat.formatted(repoId, votedEmail);
+        final String voteResFormat = "vote:res:%s";
+        String key = voteResFormat.formatted(repoId);
 
         redisTemplate.opsForHash().increment(key, votedEmail, 1);
         redisTemplate.expire(key, VOTE_EXPIRATION);
+    }
+
+    public VoteResultResponse getVoteResult(long repoId) {
+        final String voteResFormat = "vote:res:%s";
+        String key = voteResFormat.formatted(repoId);
+
+        Map<Object, Object> entries = redisTemplate.opsForHash().entries(key);
+        if (entries.isEmpty()) {
+            return new VoteResultResponse(Collections.emptyList());
+        }
+
+        List<VoteResultItem> items = entries.entrySet().stream()
+                .map(entry -> {
+                    String votedEmail = entry.getKey().toString();
+                    int votes = Integer.parseInt(entry.getValue().toString());
+
+                    return new VoteResultItem(votedEmail, votes);
+                })
+                .toList();
+
+        return new VoteResultResponse(items);
     }
 }

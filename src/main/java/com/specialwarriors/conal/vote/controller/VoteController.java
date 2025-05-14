@@ -32,7 +32,7 @@ public class VoteController {
         List<String> emails = voteService.findVoteTargetEmails(repoId, userToken);
         model.addAttribute("emails", emails);
 
-        return "vote-form";
+        return "vote/form";
     }
 
     @PostMapping("/repositories/{repoId}/votes")
@@ -46,6 +46,6 @@ public class VoteController {
 
         voteService.saveVoteResult(repoId, request);
 
-        return "vote-complete";
+        return "vote/complete";
     }
 }

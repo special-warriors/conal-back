@@ -16,7 +16,11 @@
     총 투표 수: <strong th:text="${response.totalVotes()}"></strong>
   </div>
 
-  <ul style="list-style:none; padding:0; margin:0;">
+  <div th:if="${response.totalVotes() == 0}"
+       style="color:#57606a; text-align:center; margin-top:36px; font-size:1.08rem; font-weight:500; letter-spacing:0.1px; padding:40px 0 50px;">
+    투표에 참여한 사람이 없어 결과를 제공할 수 없습니다.
+  </div>
+  <ul th:if="${response.totalVotes() > 0}" style="list-style:none; padding:0; margin:0;">
     <li th:each="result : ${response.items()}"
         style="display:flex; align-items:center; margin-bottom:24px; border-radius:4px; padding:4px 0;">
       <span
