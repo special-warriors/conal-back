@@ -12,7 +12,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-start; /* 상단 정렬로 변경 */
-      padding: 2rem 0; /* 위아래 여유 */
+      padding: 3rem 0; /* 위아래 여유 */
     }
 
     .mypage-button {
@@ -75,7 +75,7 @@
 
     .no-repo {
       text-align: center;
-      padding: 3rem 1rem;
+      padding: 4rem 1rem;
       margin: 4rem 0;
     }
 
@@ -83,11 +83,15 @@
       width: 700px;
       min-height: 500px; /* 최소 높이만 보장 */
       background-color: white;
-      padding: 2rem;
+      padding: 3rem;
       border-radius: 16px;
       box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
       position: relative;
       box-sizing: border-box;
+
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 3rem; /* footer용 여유 공간 */
     }
 
     .footer {
@@ -148,7 +152,7 @@
         <div class="repo-time">10 min</div>
       </a>
       <form th:action="@{|/users/repositories/${repository.id}|}" method="post"
-            onsubmit="return confirm('정말 삭제하시겠습니까?');">
+            onsubmit="return confirm('정말 레포지토리를 삭제하시겠습니까?');">
         <button class="repo-delete" type="submit">x</button>
       </form>
     </div>
@@ -163,10 +167,21 @@
       <button class="add-button" type="submit">리포지토리 추가하기</button>
     </form>
 
-    <form th:action="@{/logout}" method="post">
-      <button class="logout-button" type="submit">로그아웃</button>
+    <form th:action="@{/logout}" method="post" onsubmit="return confirmLogout();">
+      <button type="submit" class="logout-button">로그아웃</button>
     </form>
   </div>
+
+  <script>
+    function confirmLogout() {
+      const confirmed = confirm("정말 로그아웃 하시겠습니까?");
+      if (confirmed) {
+        alert("로그아웃 했습니다!");
+        return true;
+      }
+      return false;
+    }
+  </script>
 
 </div>
 </body>
