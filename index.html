@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Repository List</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            background-color: #1E1E1E;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 500px;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .mypage-button {
+            position: absolute;
+            right: 2rem;
+            top: 2rem;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background-color: white;
+            font-size: 13px;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .repo-list {
+            margin-top: 6rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .repo-item {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 0.8rem 1rem;
+        }
+
+        .repo-title {
+            font-size: 14px;
+            margin-bottom: 0.3rem;
+        }
+
+        .repo-url {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .no-repo {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            padding: 5rem 1rem;
+            margin: 6rem 0 2rem 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .add-button, .logout-button {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            background-color: white;
+        }
+
+        .add-button {
+            border: 1px solid #333;
+            color: #333;
+        }
+
+        .logout-button {
+            border: 1px solid #FF6B6B;
+            color: #FF6B6B;
+        }
+
+        a.repo-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <button class="mypage-button">마이페이지</button>
+
+    <!-- 레포지토리 목록이 존재할 때 -->
+    <div th:if="${repositories != null}" class="repo-list">
+        <div class="repo-item" th:each="repository : ${repositories}">
+            <div class="repo-title" th:text="${repository.name}">레포지토리 1</div>
+            <div class="repo-url" th:text="${repository.url}">https://repo1.com</div>
+        </div>
+    </div>
+
+    <!-- 레포지토리가 없을 때 -->
+    <div th:if="${repositories == null}" class="no-repo">
+        등록된 레포지토리가 없습니다!
+    </div>
+
+    <div class="footer">
+        <button class="add-button">리포지토리 추가하기</button>
+        <button class="logout-button">로그아웃</button>
+    </div>
+</div>
+</body>
+</html> 

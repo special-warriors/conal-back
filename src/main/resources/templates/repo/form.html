@@ -1,45 +1,123 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
+  <meta charset="UTF-8">
   <title>레포지토리 추가</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .form-container {
+      width: 500px;
+      background-color: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    label {
+      width: 100%;
+      text-align: center;
+      margin-top: 1.2rem;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="date"] {
+      width: 100%;
+      padding: 0.6rem;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-top: 0.3rem;
+      background-color: white;
+      box-sizing: border-box;
+
+      /* appearance 제거로 기본 UI 제거 */
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+
+      /* 아이콘 없애기 (원하면) */
+      background-image: none;
+    }
+
+    /* 캘린더 아이콘 오른쪽 정렬 및 스타일 조정 (크롬용) */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5);
+      opacity: 0.7;
+      cursor: pointer;
+      margin-left: auto;
+      margin-right: 10px;
+    }
+
+    .email-box input {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .submit-button {
+      margin-top: 2rem;
+      width: 100%;
+      padding: 0.7rem;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background-color: white;
+      cursor: pointer;
+    }
+
+    .submit-button:hover {
+      background-color: #f0f0f0;
+    }
+
+  </style>
 </head>
 <body>
-<h1>레포지토리 추가</h1>
+<div class="form-container">
+  <form th:action="@{|/users/repositories|}" th:object="${repoRequest}" method="post">
+    <label>레포지토리 이름</label>
+    <input type="text" th:field="*{name}" placeholder="레포지토리 이름을 입력해주세요" required/>
 
-<form th:action="@{|/users/${userId}/repositories|}" th:object="${repoRequest}" method="post">
-  <input type="hidden" th:field="*{userId}" th:value="${userId}"/>
+    <label>레포지토리 주소</label>
+    <input type="text" th:field="*{url}" placeholder="https://github.com/..." required/>
 
-  <div>
-    <label>레포지토리 이름:</label>
-    <input type="text" th:field="*{name}" required/>
-  </div>
+    <label>종료 일자</label>
+    <input type="date" th:field="*{endDate}" required/>
 
-  <div>
-    <label>URL:</label>
-    <input type="text" th:field="*{url}" required/>
-  </div>
+    <label>팀원 메일 주소 (최대 5개)</label>
+    <div id="email-fields">
+      <input type="email" name="emails" class="email-input" placeholder="메일 주소"/>
+      <input type="email" name="emails" class="email-input" placeholder=""/>
+      <input type="email" name="emails" class="email-input" placeholder=""/>
+      <input type="email" name="emails" class="email-input" placeholder=""/>
+      <input type="email" name="emails" class="email-input" placeholder=""/>
+    </div>
 
-  <div>
-    <label>종료일:</label>
-    <input type="date" th:field="*{endDate}"/>
-  </div>
+    <input type="hidden" name="emailsRaw" id="emailsRaw"/>
 
-  <div id="email-fields">
-    <label>알림 이메일 (최대 5개):</label><br/>
-    <input type="email" name="emails" class="email-input"/><br/>
-  </div>
-  <button type="button" onclick="addEmailField()">이메일 추가</button>
-
-  <!-- 숨겨진 필드: 서버 전송용 -->
-  <input type="hidden" name="emailsRaw" id="emailsRaw"/>
-
-  <div>
-    <button type="submit">등록</button>
-    <a th:href="@{|/users/${userId}/repositories|}">
-      <button type="button">취소</button>
-    </a>
-  </div>
-</form>
+    <button class="submit-button" type="submit">리포지토리 등록</button>
+  </form>
+</div>
 
 <script>
   function addEmailField() {
@@ -49,12 +127,13 @@
       alert("이메일은 최대 5개까지 입력할 수 있습니다.");
       return;
     }
-    const newInput = document.createElement('input');
-    newInput.type = 'email';
-    newInput.name = 'emails';
-    newInput.classList.add('email-input');
-    container.appendChild(document.createElement('br'));
-    container.appendChild(newInput);
+    const input = document.createElement('input');
+    input.type = 'email';
+    input.name = 'emails';
+    input.classList.add('email-input');
+    input.style.marginTop = '0.5rem';
+    input.style.width = '100%';
+    container.appendChild(input);
   }
 
   document.querySelector('form').addEventListener('submit', function () {
@@ -64,6 +143,5 @@
     document.getElementById('emailsRaw').value = emails.join(',');
   });
 </script>
-
 </body>
 </html>

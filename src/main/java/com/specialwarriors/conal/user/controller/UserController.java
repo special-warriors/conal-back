@@ -1,6 +1,8 @@
 package com.specialwarriors.conal.user.controller;
 
 import com.specialwarriors.conal.common.auth.session.SessionManager;
+import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
+import com.specialwarriors.conal.github_repo.service.GithubRepoService;
 import com.specialwarriors.conal.user.domain.User;
 import com.specialwarriors.conal.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 public class UserController {
 
     private final UserService userService;
+    private final GithubRepoService githubRepoService;
     private final SessionManager sessionManager;
 
     @GetMapping("/")
@@ -27,7 +30,14 @@ public class UserController {
     }
 
     @GetMapping("/home")
-    public String home() {
+    public String home(Model model, @SessionAttribute("userId") Long userId) {
+
+        User user = userService.getUserByUserId(userId);
+        GithubRepoPageResponse response = githubRepoService.getGithubRepoInfos(userId, 0);
+
+        model.addAttribute("repositories", response); // 레포지토리 리스트
+        model.addAttribute("userId", userId);
+        model.addAttribute("username", user.getUsername()); // 필요시 사용
 
         return "main/home";
     }

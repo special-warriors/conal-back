@@ -1,58 +1,146 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
+  <meta charset="UTF-8">
   <title>레포지토리 상세</title>
-  <meta charset="UTF-8"/>
   <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      font-family: sans-serif;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 800px;
+      background-color: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    .info-section, .notification-section, .contribution-section {
+      margin-top: 2rem;
+    }
+
+    .info-item {
+      margin-bottom: 0.8rem;
+      font-size: 15px;
+    }
+
+    .info-item strong {
+      display: inline-block;
+      width: 120px;
+    }
+
+    a {
+      color: #333;
+      text-decoration: none;
+    }
+
+    .checkbox-group {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+
+    label {
+      font-size: 14px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 0.5rem;
+      transform: scale(1.1);
+      cursor: pointer;
+    }
+
+    .refresh-button {
+      display: block;
+      margin: 1.5rem auto;
+      padding: 0.6rem 1.2rem;
+      font-size: 14px;
+      border-radius: 8px;
+      background-color: white;
+      border: 1px solid #333;
+      cursor: pointer;
+    }
+
     table {
       width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
     }
 
     th, td {
-      padding: 8px;
       border: 1px solid #ccc;
+      padding: 0.6rem;
+      text-align: center;
+      font-size: 14px;
     }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
   </style>
 </head>
 <body>
+<div class="container">
+  <h1>레포지토리 상세</h1>
 
-<h1>레포지토리 상세</h1>
-<div>
-  <p><strong>레포 이름:</strong> <span th:text="${repoInfo.name}">repo-name</span></p>
-  <p><strong>URL:</strong> <a th:href="${repoInfo.url}" th:text="${repoInfo.url}">repo-url</a></p>
-  <p><strong>종료일:</strong> <span th:text="${repoInfo.endDate}">end-date</span></p>
+  <div class="info-section">
+    <div class="info-item"><strong>레포 이름:</strong> <span th:text="${repoInfo.name}">repo-name</span>
+    </div>
+    <div class="info-item"><strong>URL:</strong> <a th:href="${repoInfo.url}"
+                                                    th:text="${repoInfo.url}">repo-url</a></div>
+    <div class="info-item"><strong>종료일:</strong> <span th:text="${repoInfo.endDate}">end-date</span>
+    </div>
+  </div>
+
+  <div class="notification-section">
+    <h2>알림 설정</h2>
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" id="vote-checkbox" onchange="toggleNotification('VOTE')"/>
+        투표 알림
+      </label>
+      <label>
+        <input type="checkbox" id="contribution-checkbox"
+               onchange="toggleNotification('CONTRIBUTION')"/>
+        기여도 알림
+      </label>
+    </div>
+  </div>
+
+  <div class="contribution-section">
+    <h2>기여자 기여도</h2>
+    <button class="refresh-button" id="refreshBtn" onclick="refreshDetails()">기여도 업데이트</button>
+    <table>
+      <thead>
+      <tr>
+        <th>기여자</th>
+        <th>총점</th>
+        <th>PR 수</th>
+        <th>Issue 수</th>
+        <th>Commit 수</th>
+        <th>Merge된 PR 수</th>
+      </tr>
+      </thead>
+      <tbody id="detail-body">
+      <!-- JavaScript에서 채움 -->
+      </tbody>
+    </table>
+  </div>
 </div>
-
-<!-- 🔔 알림 설정 -->
-<h2>알림 설정</h2>
-<label>
-  <input type="checkbox" id="vote-checkbox" onchange="toggleNotification('VOTE')"/>
-  투표 알림
-</label><br/>
-<label>
-  <input type="checkbox" id="contribution-checkbox" onchange="toggleNotification('CONTRIBUTION')"/>
-  기여도 알림
-</label><br/><br/>
-
-<!-- 📊 기여자 기여도 -->
-<h2>기여자 기여도</h2>
-<button id="refreshBtn" onclick="refreshDetails()">기여도 업데이트</button>
-
-<table>
-  <thead>
-  <tr>
-    <th>기여자</th>
-    <th>총점</th>
-    <th>PR 수</th>
-    <th>Issue 수</th>
-    <th>Commit 수</th>
-    <th>Merge된 PR 수</th>
-  </tr>
-  </thead>
-  <tbody id="detail-body">
-  <!-- JavaScript에서 동적으로 채움 -->
-  </tbody>
-</table>
 
 <script th:inline="javascript">
   const owner = /*[[${repoInfo.owner}]]*/ "owner";
@@ -60,10 +148,9 @@
   const userId = /*[[${repoInfo.userId}]]*/ 1;
   const repoId = /*[[${repoInfo.repoId}]]*/ 2;
 
-  // 알림 상태 불러오기 (초기 세팅용)
   function loadNotificationStatus() {
     fetch(`/users/${userId}/repositories/${repoId}/notifications/status`)
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
       document.getElementById('vote-checkbox').checked = data.vote;
       document.getElementById('contribution-checkbox').checked = data.contribution;
@@ -71,46 +158,37 @@
     .catch(err => alert("알림 상태 불러오기 실패: " + err.message));
   }
 
-  // 알림 상태 변경 요청
   function toggleNotification(type) {
-    const isChecked = document.getElementById(
-        type === 'VOTE' ? 'vote-checkbox' : 'contribution-checkbox'
-    ).checked;
-
+    const checked = document.getElementById(
+        type === 'VOTE' ? 'vote-checkbox' : 'contribution-checkbox').checked;
     fetch(`/users/${userId}/repositories/${repoId}/notifications`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        type: type,
-        isAgree: isChecked
-      })
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({type, isAgree: checked})
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("알림 설정 실패");
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("설정 실패");
       }
     })
-    .catch(err => alert("알림 설정 오류: " + err.message));
+    .catch(err => alert("설정 오류: " + err.message));
   }
 
-  // 기여도 정보 조회
   function fetchDetails() {
     fetch(`/api/github/repos/${owner}/${repo}/details`)
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
       const tbody = document.getElementById("detail-body");
       tbody.innerHTML = "";
       for (const contributor in data) {
-        const detail = data[contributor];
+        const d = data[contributor];
         const row = `<tr>
             <td>${contributor}</td>
-            <td>${detail.total}</td>
-            <td>${detail.pr}</td>
-            <td>${detail.issue}</td>
-            <td>${detail.commit}</td>
-            <td>${detail.mpr}</td>
+            <td>${d.total}</td>
+            <td>${d.pr}</td>
+            <td>${d.issue}</td>
+            <td>${d.commit}</td>
+            <td>${d.mpr}</td>
           </tr>`;
         tbody.insertAdjacentHTML('beforeend', row);
       }
@@ -118,40 +196,34 @@
     .catch(err => alert("기여도 조회 실패: " + err.message));
   }
 
-  // 기여도 갱신
   function refreshDetails() {
-    const refreshBtn = document.getElementById('refreshBtn');
-    refreshBtn.disabled = true;
-    refreshBtn.textContent = "3분 후 업데이트 가능";
-
+    const btn = document.getElementById('refreshBtn');
+    btn.disabled = true;
+    btn.textContent = "3분 후 업데이트 가능";
     fetch(`/api/github/repos/${owner}/${repo}/update`, {method: 'POST'})
-    .then(response => {
-      if (!response.ok) {
+    .then(res => {
+      if (!res.ok) {
         throw new Error("업데이트 실패");
       }
-      return response.text();
+      return res.text();
     })
     .then(() => {
       setTimeout(fetchDetails, 2000);
-      alert("기여도 업데이트가 완료되었습니다.");
+      alert("업데이트 완료");
     })
-    .catch(err => {
-      alert("기여도 업데이트 오류: " + err.message);
-    })
+    .catch(err => alert("업데이트 오류: " + err.message))
     .finally(() => {
       setTimeout(() => {
-        refreshBtn.disabled = false;
-        refreshBtn.textContent = "기여도 업데이트";
+        btn.disabled = false;
+        btn.textContent = "기여도 업데이트";
       }, 180000);
     });
   }
 
-  // 초기 실행
   window.onload = () => {
     fetchDetails();
     loadNotificationStatus();
   };
 </script>
-
 </body>
 </html>
