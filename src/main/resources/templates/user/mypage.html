@@ -18,73 +18,86 @@
       width: 400px;
       background-color: white;
       padding: 2.5rem;
-      border-radius: 20px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+      border-radius: 16px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.06);
       text-align: center;
     }
 
     .profile-image {
       width: 120px;
       height: 120px;
-      background-color: #555;
       border-radius: 50%;
+      background-color: #ddd;
       margin: 0 auto 1.5rem;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .profile-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
     }
 
     .github-id {
       font-size: 16px;
-      color: #444;
+      color: #222;
+      margin-bottom: 2rem;
     }
 
     .github-id b {
-      margin-left: 8px;
+      font-weight: bold;
+      margin-left: 4px;
     }
 
     .button {
-      margin-top: 1.5rem;
-      padding: 0.5rem 1.2rem;
+      width: 100px;
+      height: 35px;
+      padding: 0.4rem;
+      font-size: 14px;
       border: 1px solid #aaa;
       border-radius: 8px;
       background-color: white;
       cursor: pointer;
-      font-size: 14px;
+      margin-bottom: 0.8rem;
     }
 
     .button.danger {
-      margin-top: 1rem;
-      color: #c00;
-      border-color: #c00;
+      border-color: #c0392b;
+      color: #c0392b;
+    }
+
+    .button:hover {
+      background-color: #f3f3f3;
+    }
+
+    .button.danger:hover {
+      background-color: #fff1f1;
     }
   </style>
-
-  <script>
-    function confirmAndDelete() {
-      if (confirm("정말 탈퇴하시겠습니까?")) {
-        document.getElementById("deleteForm").submit();
-      }
-    }
-  </script>
 </head>
 
 <body>
 <div class="container" id="container">
+
+  <!-- 프로필 이미지 -->
   <div class="profile-image">
-    <img th:src="${avatarUrl}" alt="프로필 이미지"
-         style="width: 120px; height: 120px; border-radius: 50%;"/>
+    <img th:src="${avatarUrl}" alt="프로필 이미지"/>
   </div>
 
+  <!-- 깃허브 아이디 -->
   <div class="github-id">
-    깃허브 아이디 <b th:text="'@' + ${username}">@username</b>
+    깃허브 아이디: <b th:text="'@' + ${username}">@username</b>
   </div>
 
-  <form th:action="@{/user/notification-toggle}" method="post">
-    <button type="submit" class="button">알림 수신 동의/비동의</button>
+  <!-- 회원 탈퇴 버튼 -->
+  <form th:action="@{/user/delete}" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까?');">
+    <button type="submit" class="button danger">회원탈퇴</button>
   </form>
 
-  <form id="deleteForm" th:action="@{/user}" method="post">
-    <input type="hidden" name="_method" value="delete"/>
-    <button type="button" class="button danger" onclick="confirmAndDelete()">회원탈퇴</button>
-  </form>
 </div>
 </body>
 </html>
