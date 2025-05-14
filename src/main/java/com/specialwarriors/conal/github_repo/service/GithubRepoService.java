@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GithubRepoService {
 
-    private final int PAGE_SIZE = 7;
+    private static final int PAGE_SIZE = 7;
 
     private final GithubRepoRepository githubRepoRepository;
     private final ContributorRepository contributorRepository;
@@ -45,36 +45,46 @@ public class GithubRepoService {
 
     @Transactional
     public GithubRepoCreateResponse createGithubRepo(Long userId, GithubRepoCreateRequest request) {
-        User user = userQuery.findById(userId);
-        UrlUtil.validateGitHubUrl(request.url());
+        validateCreateRequest(request);
 
+        User user = userQuery.findById(userId);
         List<Contributor> contributors = createAndSaveContributors(request.emails());
+        List<NotificationAgreement> agreements = createAndAttachNotifications();
 
         GithubRepo githubRepo = githubRepoMapper.toGithubRepo(request);
         githubRepo.setUser(user);
         githubRepo.addContributors(contributors);
-
+        githubRepo.setNotificationAgreement(agreements);
         githubRepo = githubRepoRepository.save(githubRepo);
-
-        NotificationAgreement agreement = notificationAgreementRepository.save(
-            new NotificationAgreement(NotificationType.VOTE));
-        agreement.setGitHubRepo(githubRepo);
-
-        githubRepo.setNotificationAgreement(agreement);
 
         String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
 
         return githubRepoMapper.toGithubRepoCreateResponse(ownerAndRepo[0], ownerAndRepo[1]);
     }
 
-    private List<Contributor> createAndSaveContributors(Set<String> emails) {
-        if (emails.isEmpty()) {
+    private void validateCreateRequest(GithubRepoCreateRequest request) {
+        UrlUtil.validateGitHubUrl(request.url());
+        if (request.emails().isEmpty()) {
             throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBEMAIL);
         }
+    }
+
+
+    private List<Contributor> createAndSaveContributors(Set<String> emails) {
 
         List<Contributor> contributors = emails.stream()
             .map(Contributor::new).toList();
+
         return (List<Contributor>) contributorRepository.saveAll(contributors);
+    }
+
+    private List<NotificationAgreement> createAndAttachNotifications() {
+        return notificationAgreementRepository.saveAll(
+            List.of(
+                new NotificationAgreement(NotificationType.VOTE),
+                new NotificationAgreement(NotificationType.CONTRIBUTION)
+            )
+        );
     }
 
     @Transactional(readOnly = true)
@@ -83,7 +93,7 @@ public class GithubRepoService {
         String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
 
         return githubRepoMapper.toGithubRepoGetResponse(githubRepo, ownerAndRepo[0],
-            ownerAndRepo[1]);
+            ownerAndRepo[1], userId);
     }
 
     @Transactional(readOnly = true)

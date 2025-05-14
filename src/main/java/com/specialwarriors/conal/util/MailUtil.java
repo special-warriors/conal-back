@@ -1,5 +1,6 @@
 package com.specialwarriors.conal.util;
 
+import com.specialwarriors.conal.contribution.dto.response.ContributionFormResponse;
 import com.specialwarriors.conal.vote.dto.response.VoteFormResponse;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -33,7 +34,7 @@ public class MailUtil {
         templateModel.put("emails", response.voteTargetEmails());
 
         String voteCompleteUrl = baseUrl + "/repositories/%d/votes"
-                .formatted(response.repoId());
+            .formatted(response.repoId());
         templateModel.put("voteCompleteUrl", voteCompleteUrl);
 
         Context thymeleafContext = new Context();
@@ -48,6 +49,34 @@ public class MailUtil {
             helper.setFrom(serviceMail);
             helper.setTo(response.email());
             helper.setSubject("[Conal] 주간 투표 참여 안내");
+            helper.setText(htmlBody, true);
+
+            mailSender.send(message);
+        } catch (MessagingException | MailException e) {
+            throw new IllegalStateException("메일 발송 중 예외 발생", e);
+        }
+    }
+
+    public void sendContributionForm(ContributionFormResponse response) {
+        HashMap<String, Object> templateModel = new HashMap<>();
+        templateModel.put("email", response.email());
+
+        String contributionAnalysisCompleteUrl = baseUrl + "/users/%d/repositories/%d"
+            .formatted(response.userId(), response.repoId());
+        templateModel.put("contributionAnalysisCompleteUrl", contributionAnalysisCompleteUrl);
+
+        Context thymeleafContext = new Context();
+        thymeleafContext.setVariables(templateModel);
+
+        String htmlBody = templateEngine.process("contribution-form.html", thymeleafContext);
+
+        MimeMessage message = mailSender.createMimeMessage();
+
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(serviceMail);
+            helper.setTo(response.email());
+            helper.setSubject("[Conal] 기여도 분석 결과 알림");
             helper.setText(htmlBody, true);
 
             mailSender.send(message);

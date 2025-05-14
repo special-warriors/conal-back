@@ -25,11 +25,13 @@ public interface GithubRepoMapper {
     }
 
     default GithubRepoGetResponse toGithubRepoGetResponse(GithubRepo repo, String owner,
-        String reponame) {
+        String reponame, Long userId) {
         return new GithubRepoGetResponse(
+            userId,
+            repo.getId(),
             repo.getName(),
             repo.getUrl(),
-            repo.getNotificationAgreement(),
+            repo.getNotificationAgreements(),
             repo.getEndDate(),
             owner,
             reponame

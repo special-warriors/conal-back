@@ -13,7 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,7 +29,6 @@ public class GithubRepo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "github_repo_id")
     private Long id;
 
     @Column(nullable = false)
@@ -45,8 +43,8 @@ public class GithubRepo {
     @OneToMany(mappedBy = "githubRepo", cascade = CascadeType.ALL)
     private List<Contributor> contributors = new ArrayList<>();
 
-    @OneToOne(mappedBy = "githubRepo")
-    private NotificationAgreement notificationAgreement;
+    @OneToMany(mappedBy = "githubRepo")
+    private List<NotificationAgreement> notificationAgreements = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -67,9 +65,11 @@ public class GithubRepo {
         }
     }
 
-    public void setNotificationAgreement(NotificationAgreement agreement) {
-        this.notificationAgreement = agreement;
-        agreement.setGitHubRepo(this);
+    public void setNotificationAgreement(List<NotificationAgreement> agreements) {
+        for (NotificationAgreement agreement : agreements) {
+            this.notificationAgreements.add(agreement);
+            agreement.setGitHubRepo(this);
+        }
     }
 
     public void setUser(User user) {
