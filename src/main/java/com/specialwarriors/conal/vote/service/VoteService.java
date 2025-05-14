@@ -7,10 +7,14 @@ import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.github_repo.service.GithubRepoQuery;
 import com.specialwarriors.conal.vote.dto.request.VoteSubmitRequest;
 import com.specialwarriors.conal.vote.dto.response.VoteFormResponse;
+import com.specialwarriors.conal.vote.dto.response.VoteResultItem;
+import com.specialwarriors.conal.vote.dto.response.VoteResultResponse;
 import com.specialwarriors.conal.vote.exception.VoteException;
+import io.jsonwebtoken.lang.Collections;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -120,5 +124,29 @@ public class VoteService {
 
         redisTemplate.opsForHash().increment(key, votedEmail, 1);
         redisTemplate.expire(key, VOTE_EXPIRATION);
+    }
+
+    public VoteResultResponse getVoteResult(long repoId) {
+        final String voteResFormat = "vote:res:%s:*";
+        String pattern = voteResFormat.formatted(repoId);
+
+        Set<String> keys = redisTemplate.keys(pattern);
+        if (Collections.isEmpty(keys)) {
+            return new VoteResultResponse(Collections.emptyList());
+        }
+
+        List<VoteResultItem> items = keys.stream()
+                .map(key -> {
+                    String votedEmail = key.substring(key.lastIndexOf(":") + 1);
+                    int votes = Optional.ofNullable(redisTemplate.opsForHash().get(key, votedEmail))
+                            .map(Object::toString)
+                            .map(Integer::parseInt)
+                            .orElse(0);
+
+                    return new VoteResultItem(votedEmail, votes);
+                })
+                .toList();
+
+        return new VoteResultResponse(items);
     }
 }
