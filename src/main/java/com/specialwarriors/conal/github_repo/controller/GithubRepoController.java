@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 @Controller
-@RequestMapping("/users/{userId}/repositories")
+@RequestMapping("/users/repositories")
 @RequiredArgsConstructor
 public class GithubRepoController {
 
@@ -27,9 +28,9 @@ public class GithubRepoController {
     private final GitHubService gitHubService;
 
     @GetMapping("/new")
-    public String showCreateForm(@PathVariable Long userId, Model model) {
+    public String showCreateForm(@SessionAttribute Long userId, Model model) {
         model.addAttribute("repoRequest",
-            new GithubRepoCreateRequest(userId, "", "", null, Set.of()));
+                new GithubRepoCreateRequest(userId, "", "", null, Set.of()));
         model.addAttribute("userId", userId);
 
         return "repo/form";
@@ -37,43 +38,43 @@ public class GithubRepoController {
 
     // 저장 (POST)
     @PostMapping
-    public String createGitHubRepo(@PathVariable Long userId,
-        @ModelAttribute GithubRepoCreateRequest request) {
+    public String createGitHubRepo(@SessionAttribute Long userId,
+            @ModelAttribute GithubRepoCreateRequest request) {
         GithubRepoCreateResponse response = githubRepoService.createGithubRepo(userId, request);
         gitHubService.updateRepoContribution(response.owner(), response.repo()).subscribe();
 
-        return "redirect:/users/" + userId + "/repositories";
+        return "redirect:/home";
     }
 
     // 목록 조회 (GET)
     @GetMapping
-    public String getGithubRepos(@PathVariable long userId,
-        @RequestParam(defaultValue = "0") int page,
-        Model model) {
+    public String getGithubRepos(@SessionAttribute Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
 
         GithubRepoPageResponse response = githubRepoService.getGithubRepoInfos(userId, page);
         model.addAttribute("repositories", response);
         model.addAttribute("userId", userId);
 
-        return "repo/list"; // templates/repo/list.html
+        return "main/home";
     }
 
     // 단일 조회 (GET)
     @GetMapping("/{repositoryId}")
-    public String getRepositoryId(@PathVariable long userId,
-        @PathVariable long repositoryId,
-        Model model) {
+    public String getRepositoryId(@SessionAttribute Long userId,
+            @PathVariable long repositoryId,
+            Model model) {
         GithubRepoGetResponse response = githubRepoService.getGithubRepoInfo(userId, repositoryId);
         model.addAttribute("repoInfo", response);
 
-        return "repo/detail"; // templates/repo/detail.html
+        return "repo/detail";
     }
 
     @PostMapping("/{repositoryId}")
-    public String deleteResponse(@PathVariable long userId,
-        @PathVariable long repositoryId) {
+    public String deleteRepository(@SessionAttribute Long userId,
+            @PathVariable long repositoryId) {
         GithubRepoDeleteResponse response = githubRepoService.deleteRepo(userId, repositoryId);
 
-        return "redirect:/users/" + userId + "/repositories";
+        return "redirect:/home";
     }
 }
