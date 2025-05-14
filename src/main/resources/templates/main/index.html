@@ -1,63 +1,52 @@
-<style>
-  html, body {
-    height: 100%;
-    margin: 0;
-    background-color: #f9f9f9;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>WELCOME TO CONAL</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  .container {
-    width: 50%;
-    max-width: 640px;
-    min-height: 400px;
+    body {
+      height: 100vh;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+    }
 
-    padding: 2.5rem 2rem;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+    h1 {
+      font-size: 40px;
+      font-weight: 700;
+      color: #000;
+      margin-bottom: 60px;
+    }
 
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    text-align: center;
+    button {
+      padding: 16px 32px;
+      font-size: 16px;
+      border: 1px solid #aaa;
+      border-radius: 12px;
+      background-color: #fff;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+    }
 
-    position: relative;
-  }
-
-  h1 {
-    margin-bottom: 2.5rem;
-    font-size: 1.5rem;
-  }
-
-  .github-form {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
-  .github-button {
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    border: 1px solid #444;
-    background-color: #333;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
-  }
-
-  .github-button:hover {
-    background-color: #000;
-  }
-</style>
-
-<div class="container">
-  <h1>GitHub 속 당신의 흔적, Conal이 찾아드립니다</h1>
-  <form action="/oauth2/authorization/github" method="get" class="github-form">
-    <button type="submit" class="github-button">기여도 분석하기</button>
-  </form>
-</div>
+    button:hover {
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+<h1>GitHub 속 당신의 흔적, Conal이 찾아드립니다</h1>
+<form th:action="@{/oauth2/authorization/github}" method="get">
+  <button type="submit">기여도 분석하기</button>
+</form>
+</body>
+</html>
