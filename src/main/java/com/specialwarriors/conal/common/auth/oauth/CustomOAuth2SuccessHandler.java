@@ -39,7 +39,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         sessionManager.createSession(request, user.getId());
 
         OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
-        String registrationId = oauthToken.getAuthorizedClientRegistrationId();
+        String registrationId = oauthToken.getAuthorizedClientRegistrationId(); // client 이름
 
         OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
                 registrationId,
