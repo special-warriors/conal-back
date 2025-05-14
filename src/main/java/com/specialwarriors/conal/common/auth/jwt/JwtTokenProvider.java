@@ -21,7 +21,6 @@ public class JwtTokenProvider {
                 SIG.HS256.key().build().getAlgorithm());
     }
 
-
     public String createVoteUserToken(String email, Date issuedAt, long expirationMillis) {
         Date expiration = new Date(issuedAt.getTime() + expirationMillis);
 

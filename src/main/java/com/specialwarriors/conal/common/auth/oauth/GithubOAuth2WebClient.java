@@ -22,7 +22,7 @@ public class GithubOAuth2WebClient {
 
     public void unlink(String oauthAccessToken) {
 
-        if (StringUtils.hasText(oauthAccessToken)) {
+        if (!StringUtils.hasText(oauthAccessToken)) {
             throw new GeneralException(AuthException.EMPTY_OAUTH_TOKEN);
         }
 
