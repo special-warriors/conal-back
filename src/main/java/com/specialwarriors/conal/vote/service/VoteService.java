@@ -14,7 +14,7 @@ import io.jsonwebtoken.lang.Collections;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -119,29 +119,26 @@ public class VoteService {
 
     public void saveVoteResult(long repoId, VoteSubmitRequest request) {
         final String votedEmail = request.votedEmail();
-        final String voteResFormat = "vote:res:%s:%s";
-        String key = voteResFormat.formatted(repoId, votedEmail);
+        final String voteResFormat = "vote:res:%s";
+        String key = voteResFormat.formatted(repoId);
 
         redisTemplate.opsForHash().increment(key, votedEmail, 1);
         redisTemplate.expire(key, VOTE_EXPIRATION);
     }
 
     public VoteResultResponse getVoteResult(long repoId) {
-        final String voteResFormat = "vote:res:%s:*";
-        String pattern = voteResFormat.formatted(repoId);
+        final String voteResFormat = "vote:res:%s";
+        String key = voteResFormat.formatted(repoId);
 
-        Set<String> keys = redisTemplate.keys(pattern);
-        if (Collections.isEmpty(keys)) {
+        Map<Object, Object> entries = redisTemplate.opsForHash().entries(key);
+        if (entries.isEmpty()) {
             return new VoteResultResponse(Collections.emptyList());
         }
 
-        List<VoteResultItem> items = keys.stream()
-                .map(key -> {
-                    String votedEmail = key.substring(key.lastIndexOf(":") + 1);
-                    int votes = Optional.ofNullable(redisTemplate.opsForHash().get(key, votedEmail))
-                            .map(Object::toString)
-                            .map(Integer::parseInt)
-                            .orElse(0);
+        List<VoteResultItem> items = entries.entrySet().stream()
+                .map(entry -> {
+                    String votedEmail = entry.getKey().toString();
+                    int votes = Integer.parseInt(entry.getValue().toString());
 
                     return new VoteResultItem(votedEmail, votes);
                 })
