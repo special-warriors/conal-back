@@ -2,7 +2,6 @@ package com.specialwarriors.conal.notification.service;
 
 import com.specialwarriors.conal.common.exception.GeneralException;
 import com.specialwarriors.conal.github_repo.domain.GithubRepo;
-import com.specialwarriors.conal.github_repo.service.GithubRepoQuery;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
 import com.specialwarriors.conal.notification.enums.NotificationType;
 import com.specialwarriors.conal.notification.exception.NotificationAgreementException;
@@ -15,18 +14,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class NotificationAgreementQuery {
 
-    private final GithubRepoQuery githubRepoQuery;
     private final NotificationAgreementRepository notificationAgreementRepository;
 
     public NotificationAgreement findByGithubRepoAndType(GithubRepo githubRepo,
-        NotificationType type) {
+            NotificationType type) {
 
         return notificationAgreementRepository
-            .findAllByGithubRepoIdAndNotificationType(githubRepo.getId(), type)
-            .stream()
-            .findFirst()
-            .orElseThrow(() -> new GeneralException(
-                NotificationAgreementException.NOTIFICATION_AGREEMENT_NOT_FOUND));
+                .findAllByGithubRepoIdAndNotificationType(githubRepo.getId(), type)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new GeneralException(
+                        NotificationAgreementException.NOTIFICATION_AGREEMENT_NOT_FOUND));
     }
 
     public List<NotificationAgreement> findAllByType(NotificationType type) {

@@ -23,6 +23,7 @@ public class WebClientConfig {
 
     @Bean
     public WebClient githubWebClient() {
+
         return WebClient.builder()
                 .baseUrl("https://api.github.com")
                 .defaultHeader(HttpHeaders.USER_AGENT, "spring-webclient")
@@ -32,6 +33,7 @@ public class WebClientConfig {
 
     @Bean
     public WebClient githubRevokeWebClient() {
+
         String basicAuth = Base64.getEncoder()
                 .encodeToString((clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8));
 

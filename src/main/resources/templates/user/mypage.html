@@ -94,7 +94,8 @@
   </div>
 
   <!-- 회원 탈퇴 버튼 -->
-  <form th:action="@{/user/delete}" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까?');">
+  <form th:action="@{/user}" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까?');">
+    <input type="hidden" name="_method" value="delete"/>
     <button type="submit" class="button danger">회원탈퇴</button>
   </form>
 

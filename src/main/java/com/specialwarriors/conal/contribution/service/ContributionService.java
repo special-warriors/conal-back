@@ -11,11 +11,12 @@ import org.springframework.stereotype.Service;
 public class ContributionService {
 
     public ContributionFormResponse sendEmail(Contributor contributor, GithubRepo githubRepo) {
+
         Long userId = githubRepo.getUser().getId();
         Long repoId = githubRepo.getId();
 
         return new ContributionFormResponse(userId, repoId,
-            contributor.getEmail());
+                contributor.getEmail());
     }
 
 

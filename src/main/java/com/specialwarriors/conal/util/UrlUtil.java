@@ -1,4 +1,4 @@
-package com.specialwarriors.conal.util;
+package com.specialwarriors.conal.github_repo.util;
 
 import com.specialwarriors.conal.common.exception.GeneralException;
 import com.specialwarriors.conal.github_repo.exception.GithubRepoException;
@@ -8,9 +8,10 @@ import java.util.regex.Pattern;
 public class UrlUtil {
 
     private static final Pattern GITHUB_URL_PATTERN =
-        Pattern.compile("^https://github\\.com/([^/]+)/([^/]+)$");
+            Pattern.compile("^https://github\\.com/([^/]+)/([^/]+)$");
 
     public static String[] urlToOwnerAndReponame(String url) {
+
         Matcher matcher = GITHUB_URL_PATTERN.matcher(url);
         if (matcher.find()) {
             String owner = matcher.group(1);

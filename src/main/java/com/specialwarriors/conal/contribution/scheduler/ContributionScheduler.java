@@ -25,19 +25,20 @@ public class ContributionScheduler {
 
     @Scheduled(cron = "0 0 9 ? * FRI")
     public void sendContribution() {
+
         List<NotificationAgreement> notificationAgreements = notificationAgreementQuery
-            .findAllByType(NotificationType.CONTRIBUTION);
+                .findAllByType(NotificationType.CONTRIBUTION);
 
         List<Long> githubRepoIds = notificationAgreements.stream()
-            .map(NotificationAgreement::getGithubRepoId)
-            .toList();
+                .map(NotificationAgreement::getGithubRepoId)
+                .toList();
 
         List<GithubRepo> githubRepos = githubRepoRepository.findAllById(githubRepoIds);
 
         for (GithubRepo githubRepo : githubRepos) {
             for (Contributor contributor : githubRepo.getContributors()) {
                 mailUtil.sendContributionForm(
-                    contributionService.sendEmail(contributor, githubRepo));
+                        contributionService.sendEmail(contributor, githubRepo));
             }
         }
     }
