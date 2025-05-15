@@ -73,24 +73,24 @@ public class GithubRepoService {
 
     private void validateCreateRequest(GithubRepoCreateRequest request) {
         if (!request.name().isEmpty()) {
-            throw new GeneralException(GithubRepoException.NOT_FOUND_REPONAME);
+            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO_NAME);
         }
         if (!GITHUB_URL_PATTERN.matcher(request.url()).matches()) {
-            throw new GeneralException(GithubRepoException.INVALID_URL);
+            throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_URL);
         }
         if (request.emails().isEmpty()) {
-            throw new GeneralException(GithubRepoException.NOT_FOUND_EMAIL);
+            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO_EMAIL);
         }
         if (request.emails().size() > 5) {
-            throw new GeneralException(GithubRepoException.EXCEED_EMAIL);
+            throw new GeneralException(GithubRepoException.EXCEED_GITHUBREPO_EMAIL);
         }
         for (String email : request.emails()) {
             if (!EMAIL_PATTERN.matcher(email).matches()) {
-                throw new GeneralException(GithubRepoException.INVALID_EMAIL);
+                throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_EMAIL);
             }
         }
         if (request.endDate() == null) {
-            throw new GeneralException(GithubRepoException.INVALID_DURATION);
+            throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_DURATION);
         }
     }
 
