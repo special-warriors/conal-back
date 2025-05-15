@@ -78,10 +78,10 @@ public class VoteService {
         }
 
         Set<String> userTokens = redisTemplate.opsForSet().members(voteKey);
-        List<String> voteTargetEmails = userTokens.stream().map(jwtProvider::getEmailFrom).toList();
+        List<String> voteTargetEmails = userTokens.stream().map(jwtProvider::extractEmailFrom).toList();
 
         return userTokens.stream().map(userToken -> {
-                    String email = jwtProvider.getEmailFrom(userToken);
+                    String email = jwtProvider.extractEmailFrom(userToken);
 
                     return new VoteFormResponse(repoId, userToken, email, voteTargetEmails);
                 })
