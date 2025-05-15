@@ -65,7 +65,7 @@ public class GithubRepoService {
     private void validateCreateRequest(GithubRepoCreateRequest request) {
         UrlUtil.validateGitHubUrl(request.url());
         if (request.emails().isEmpty()) {
-            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBEMAIL);
+            throw new GeneralException(GithubRepoException.CONTRIBUTOR_EMAIL_NOT_FOUND);
         }
     }
 
