@@ -48,7 +48,7 @@ public class UserServiceTest {
 
     @Nested
     @DisplayName("유저 아이디로 사용자를 조회할 때")
-    class FindUserById {
+    class FindUserByIdTest {
 
         @Test
         @DisplayName("성공한다")
@@ -59,7 +59,7 @@ public class UserServiceTest {
             given(userRepository.findById(userId)).willReturn(Optional.of(mockUser));
 
             // when
-            User result = userService.getUser(userId);
+            User result = userService.findById(userId);
 
             // then
             assertThat(result).isEqualTo(mockUser);
@@ -75,7 +75,7 @@ public class UserServiceTest {
             given(userRepository.findById(userId)).willReturn(Optional.empty());
 
             // when, then
-            assertThatThrownBy(() -> userService.getUser(userId))
+            assertThatThrownBy(() -> userService.findById(userId))
                     .isInstanceOf(GeneralException.class)
                     .extracting("exception")
                     .isEqualTo(UserException.USER_NOT_FOUND);
@@ -84,7 +84,7 @@ public class UserServiceTest {
 
     @Nested
     @DisplayName("사용자를 삭제할 때")
-    class DeleteUser {
+    class DeleteUserTest {
 
         @Test
         @DisplayName("깃허브 토큰과 세션을 삭제한다")
@@ -102,7 +102,7 @@ public class UserServiceTest {
             given(ops.get(githubTokenKey)).willReturn(githubTokenValue);
 
             // when
-            userService.deleteUser(userId);
+            userService.deleteById(userId);
 
             // then
             verify(githubOAuth2WebClient).unlink(githubTokenValue);
@@ -119,12 +119,10 @@ public class UserServiceTest {
             given(userRepository.findById(userId)).willReturn(Optional.empty());
 
             // when, then
-            assertThatThrownBy(() -> userService.deleteUser(userId))
+            assertThatThrownBy(() -> userService.deleteById(userId))
                     .isInstanceOf(GeneralException.class)
                     .extracting("exception")
                     .isEqualTo(UserException.USER_NOT_FOUND);
-
-            verify(userRepository).findById(userId);
         }
     }
 
