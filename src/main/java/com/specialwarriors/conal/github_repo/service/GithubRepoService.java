@@ -18,6 +18,7 @@ import com.specialwarriors.conal.user.domain.User;
 import com.specialwarriors.conal.user.service.UserQuery;
 import com.specialwarriors.conal.util.UrlUtil;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -80,7 +81,8 @@ public class GithubRepoService {
         }
 
         long validEmailCount = request.emails().stream()
-            .filter(email -> email != null && !email.trim().isEmpty())
+            .filter(Objects::nonNull)
+            .filter(email -> !email.trim().isEmpty())
             .count();
 
         if (validEmailCount == 0) {
@@ -91,13 +93,14 @@ public class GithubRepoService {
         }
 
         for (String email : request.emails()) {
-            if (email == null || email.trim().isEmpty()) {
-                continue;
-            }
 
-            if (!EMAIL_PATTERN.matcher(email.trim()).matches()) {
-                throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_EMAIL);
+            if (Objects.nonNull(email)) {
+                String trimmed = email.trim();
+                if (!trimmed.isEmpty() && !EMAIL_PATTERN.matcher(trimmed).matches()) {
+                    throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_EMAIL);
+                }
             }
+            
         }
 
         if (request.endDate() == null) {
