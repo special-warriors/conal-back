@@ -38,7 +38,7 @@ public class VoteService {
         final Date issuedAt = new Date();
         final long expirationMillis = 604800000;
 
-        GithubRepo githubRepo = githubRepoQuery.findByRepositoryId(repoId);
+        GithubRepo githubRepo = githubRepoQuery.findById(repoId);
         List<Contributor> contributors = githubRepo.getContributors();
 
         String[] userTokens = contributors.stream().map(Contributor::getEmail)
@@ -62,7 +62,7 @@ public class VoteService {
             throw new GeneralException(VoteException.UNAUTHORIZED_VOTE_ACCESS);
         }
 
-        GithubRepo githubRepo = githubRepoQuery.findByRepositoryId(repoId);
+        GithubRepo githubRepo = githubRepoQuery.findById(repoId);
 
         return githubRepo.getContributors().stream()
                 .map(Contributor::getEmail)
