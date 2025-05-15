@@ -4,7 +4,6 @@ package com.specialwarriors.conal.github_repo.dto;
 import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.github_repo.dto.request.GithubRepoCreateRequest;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoCreateResponse;
-import com.specialwarriors.conal.github_repo.dto.response.GithubRepoDeleteResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse.GithubRepoSummary;
@@ -43,7 +42,7 @@ public interface GithubRepoMapper {
     GithubRepoSummary toGithubRepoSummary(GithubRepo repo);
 
     default GithubRepoPageResponse toGithubRepoPageResponse(Page<GithubRepo> page, Long userId) {
-        
+
         return new GithubRepoPageResponse(
             page.getContent().stream()
                 .map(this::toGithubRepoSummary)
@@ -54,12 +53,5 @@ public interface GithubRepoMapper {
             page.getTotalElements()
         );
     }
-
-    default GithubRepoDeleteResponse toGithubDeleteRepoResponse() {
-
-        return new GithubRepoDeleteResponse(
-            true
-        );
-    }
-
+    
 }
