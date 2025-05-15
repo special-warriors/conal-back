@@ -10,7 +10,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(GeneralException.class)
     public ResponseEntity<ExceptionResponse> handleGeneralException(GeneralException e) {
 
-        return ResponseEntity.status(e.getStatus())
-            .body(new ExceptionResponse(e.getMessage()));
+        return ResponseEntity.status(e.getStatus()).body(new ExceptionResponse(e.getMessage()));
     }
 }
