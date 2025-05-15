@@ -3,6 +3,7 @@ package com.specialwarriors.conal.contribution.scheduler;
 import com.specialwarriors.conal.contribution.service.ContributionService;
 import com.specialwarriors.conal.contributor.domain.Contributor;
 import com.specialwarriors.conal.github_repo.domain.GithubRepo;
+import com.specialwarriors.conal.github_repo.repository.GithubRepoRepository;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
 import com.specialwarriors.conal.notification.enums.NotificationType;
 import com.specialwarriors.conal.notification.service.NotificationAgreementQuery;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 public class ContributionScheduler {
 
     private final NotificationAgreementQuery notificationAgreementQuery;
+    private final GithubRepoRepository githubRepoRepository;
     private final ContributionService contributionService;
 
     private final MailUtil mailUtil;
@@ -26,9 +28,11 @@ public class ContributionScheduler {
         List<NotificationAgreement> notificationAgreements = notificationAgreementQuery
             .findAllByType(NotificationType.CONTRIBUTION);
 
-        List<GithubRepo> githubRepos = notificationAgreements.stream()
-            .map(NotificationAgreement::getGithubRepo)
+        List<Long> githubRepoId = notificationAgreements.stream()
+            .map(NotificationAgreement::getGithubRepoId)
             .toList();
+
+        List<GithubRepo> githubRepos = githubRepoRepository.findAllById(githubRepoId);
 
         for (GithubRepo githubRepo : githubRepos) {
             for (Contributor contributor : githubRepo.getContributors()) {

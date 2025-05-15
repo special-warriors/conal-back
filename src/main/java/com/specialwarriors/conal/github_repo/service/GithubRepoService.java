@@ -79,6 +79,7 @@ public class GithubRepoService {
     }
 
     private List<NotificationAgreement> createAndAttachNotifications() {
+        
         return notificationAgreementRepository.saveAll(
             List.of(
                 new NotificationAgreement(NotificationType.VOTE),
@@ -109,7 +110,7 @@ public class GithubRepoService {
     public GithubRepoDeleteResponse deleteRepo(Long userId, Long repositoryId) {
         GithubRepo repo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repositoryId);
         contributorRepository.deleteAllByGithubRepo(repo);
-        notificationAgreementRepository.deleteByGithubRepo(repo);
+        notificationAgreementRepository.deleteByGithubRepoId(repo.getId());
         githubRepoRepository.delete(repo);
 
         return githubRepoMapper.toGithubDeleteRepoResponse();
