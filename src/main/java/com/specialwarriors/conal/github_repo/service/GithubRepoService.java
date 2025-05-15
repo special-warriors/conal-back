@@ -12,15 +12,15 @@ import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.exception.GithubRepoException;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepository;
-import com.specialwarriors.conal.github_repo.repository.GithubRepoRepositoryCustom;
-import com.specialwarriors.conal.github_repo.util.UrlUtil;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
 import com.specialwarriors.conal.notification.enums.NotificationType;
 import com.specialwarriors.conal.notification.repository.NotificationAgreementRepository;
 import com.specialwarriors.conal.user.domain.User;
 import com.specialwarriors.conal.user.service.UserQuery;
+import com.specialwarriors.conal.util.UrlUtil;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,10 +34,19 @@ public class GithubRepoService {
 
     private static final int PAGE_SIZE = 7;
 
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+        "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$",
+        Pattern.CASE_INSENSITIVE
+    );
+
+    private static final Pattern GITHUB_URL_PATTERN = Pattern.compile(
+        "^(https://)?(www\\.)?github\\.com/[^/\\s]+/[^/\\s]+/?$",
+        Pattern.CASE_INSENSITIVE
+    );
+
     private final GithubRepoRepository githubRepoRepository;
     private final ContributorRepository contributorRepository;
     private final NotificationAgreementRepository notificationAgreementRepository;
-    private final GithubRepoRepositoryCustom githubRepoRepositoryCustom;
 
     private final UserQuery userQuery;
     private final GithubRepoQuery githubRepoQuery;
@@ -63,12 +72,27 @@ public class GithubRepoService {
     }
 
     private void validateCreateRequest(GithubRepoCreateRequest request) {
-        UrlUtil.validateGitHubUrl(request.url());
+        if (!request.name().isEmpty()) {
+            throw new GeneralException(GithubRepoException.NOT_FOUND_REPONAME);
+        }
+        if (!GITHUB_URL_PATTERN.matcher(request.url()).matches()) {
+            throw new GeneralException(GithubRepoException.INVALID_URL);
+        }
         if (request.emails().isEmpty()) {
-            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBEMAIL);
+            throw new GeneralException(GithubRepoException.NOT_FOUND_EMAIL);
+        }
+        if (request.emails().size() > 5) {
+            throw new GeneralException(GithubRepoException.EXCEED_EMAIL);
+        }
+        for (String email : request.emails()) {
+            if (!EMAIL_PATTERN.matcher(email).matches()) {
+                throw new GeneralException(GithubRepoException.INVALID_EMAIL);
+            }
+        }
+        if (request.endDate() == null) {
+            throw new GeneralException(GithubRepoException.INVALID_DURATION);
         }
     }
-
 
     private List<Contributor> createAndSaveContributors(Set<String> emails) {
 
@@ -99,7 +123,7 @@ public class GithubRepoService {
     @Transactional(readOnly = true)
     public GithubRepoPageResponse getGithubRepoInfos(Long userId, int page) {
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Page<GithubRepo> resultPage = githubRepoRepositoryCustom.findGithubRepoPages(userId,
+        Page<GithubRepo> resultPage = githubRepoRepository.findGithubRepoPages(userId,
             pageable);
 
         return githubRepoMapper.toGithubRepoPageResponse(resultPage, userId);
