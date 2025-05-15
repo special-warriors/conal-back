@@ -41,9 +41,9 @@ public class User {
         this.avatarUrl = avatarUrl;
     }
 
-    public boolean hasGithubRepo(long repositoryId) {
+    public boolean notHasGithubRepo(GithubRepo githubRepo) {
 
-        return githubRepos.stream().anyMatch(repo -> repo.getId() == repositoryId);
+        return !githubRepos.contains(githubRepo);
     }
 
     public void addGithubRepo(GithubRepo githubRepo) {
