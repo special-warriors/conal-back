@@ -15,5 +15,5 @@ public interface NotificationAgreementRepository extends
 
     List<NotificationAgreement> findAllByNotificationType(NotificationType notificationType);
 
-    void deleteByGithubRepoId(Long githubRepoId);
+    void deleteByGithubRepoId(long githubRepoId);
 }

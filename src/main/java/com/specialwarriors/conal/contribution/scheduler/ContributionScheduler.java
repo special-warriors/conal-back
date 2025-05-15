@@ -28,11 +28,11 @@ public class ContributionScheduler {
         List<NotificationAgreement> notificationAgreements = notificationAgreementQuery
             .findAllByType(NotificationType.CONTRIBUTION);
 
-        List<Long> githubRepoId = notificationAgreements.stream()
+        List<Long> githubRepoIds = notificationAgreements.stream()
             .map(NotificationAgreement::getGithubRepoId)
             .toList();
 
-        List<GithubRepo> githubRepos = githubRepoRepository.findAllById(githubRepoId);
+        List<GithubRepo> githubRepos = githubRepoRepository.findAllById(githubRepoIds);
 
         for (GithubRepo githubRepo : githubRepos) {
             for (Contributor contributor : githubRepo.getContributors()) {

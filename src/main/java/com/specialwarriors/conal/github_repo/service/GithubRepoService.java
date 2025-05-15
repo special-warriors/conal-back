@@ -53,7 +53,7 @@ public class GithubRepoService {
         GithubRepo githubRepo = githubRepoMapper.toGithubRepo(request);
         githubRepo.setUser(user);
         githubRepo.addContributors(contributors);
-        githubRepo.setNotificationAgreement(agreements);
+        githubRepo.assignRepoIdToNotificationAgreements(agreements);
         githubRepo = githubRepoRepository.save(githubRepo);
 
         String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());

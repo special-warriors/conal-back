@@ -25,8 +25,8 @@ public class NotificationAgreement {
 
     private boolean isAgree;
 
-    @Column(name = "github_repo_id", nullable = false)
-    private Long githubRepoId;
+    @Column(name = "github_repo_id")
+    private long githubRepoId;
 
     @Convert(converter = NotificationTypeConverter.class)
     private NotificationType notificationType;

@@ -62,11 +62,12 @@ public class GithubRepo {
         }
     }
 
-    public void setNotificationAgreement(List<NotificationAgreement> agreements) {
-        for (NotificationAgreement agreement : agreements) {
-            agreement.setGitHubRepoId(this.getId());
-        }
+    public void assignRepoIdToNotificationAgreements(
+        List<NotificationAgreement> notificationAgreements) {
+
+        notificationAgreements.forEach(agreement -> agreement.setGitHubRepoId(this.getId()));
     }
+
 
     public void setUser(User user) {
         this.user = user;
