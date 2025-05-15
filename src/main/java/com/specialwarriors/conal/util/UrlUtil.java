@@ -1,4 +1,4 @@
-package com.specialwarriors.conal.github_repo.util;
+package com.specialwarriors.conal.util;
 
 import com.specialwarriors.conal.common.exception.GeneralException;
 import com.specialwarriors.conal.github_repo.exception.GithubRepoException;
@@ -10,7 +10,6 @@ public class UrlUtil {
     private static final Pattern GITHUB_URL_PATTERN =
         Pattern.compile("^https://github\\.com/([^/]+)/([^/]+)$");
 
-
     public static String[] urlToOwnerAndReponame(String url) {
         Matcher matcher = GITHUB_URL_PATTERN.matcher(url);
         if (matcher.find()) {
@@ -19,15 +18,8 @@ public class UrlUtil {
 
             return new String[]{owner, repoName};
         } else {
-            throw new GeneralException(GithubRepoException.INVALID_URL);
+            throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_URL);
         }
     }
 
-    public static void validateGitHubUrl(String url) {
-        // GitHub 저장소 URL 형식 검증: https://github.com/{owner}/{repo}
-        String regex = "^https://github\\.com/[^/]+/[^/]+$";
-        if (!url.matches(regex)) {
-            throw new GeneralException(GithubRepoException.INVALID_URL);
-        }
-    }
 }

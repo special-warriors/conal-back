@@ -67,7 +67,7 @@ public class GitHubService {
             long pr = tuple.getT2();
             long mpr = tuple.getT3();
             long issue = tuple.getT4();
-            long totalScore = commit + pr + mpr + issue;
+            double score = commit * 0.1 + pr * 0.5 + mpr + issue * 0.2;
 
             String detailKey = buildDetailKey(owner, repo, login);
 
@@ -76,7 +76,7 @@ public class GitHubService {
                     "pr", String.valueOf(pr),
                     "mpr", String.valueOf(mpr),
                     "issue", String.valueOf(issue),
-                    "total", String.valueOf(totalScore)
+                    "score", String.valueOf(score)
                 ))
                 .then(reactiveRedisTemplate.expire(detailKey, TTL));
         }).then();

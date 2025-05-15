@@ -13,12 +13,6 @@ public class GithubRepoQuery {
 
     private final GithubRepoRepository githubRepoRepository;
 
-    public GithubRepo findByRepositoryId(Long repositoryId) {
-        return githubRepoRepository.findById(repositoryId).orElseThrow(() ->
-            new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO)
-        );
-    }
-
     public GithubRepo findByUserIdAndRepositoryId(Long userId, Long repositoryId) {
 
         GithubRepo githubRepo = githubRepoRepository.findById(repositoryId).orElseThrow(() ->
@@ -35,6 +29,6 @@ public class GithubRepoQuery {
     public GithubRepo findByRepositoryId(long repositoryId) {
 
         return githubRepoRepository.findById(repositoryId)
-                .orElseThrow(() -> new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO));
+            .orElseThrow(() -> new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO));
     }
 }
