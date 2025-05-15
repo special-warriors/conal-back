@@ -8,6 +8,8 @@ import static org.mockito.Mockito.verify;
 
 import com.specialwarriors.conal.common.auth.oauth.GithubOAuth2WebClient;
 import com.specialwarriors.conal.common.exception.GeneralException;
+import com.specialwarriors.conal.github_repo.repository.GithubRepoRepository;
+import com.specialwarriors.conal.notification.repository.NotificationAgreementRepository;
 import com.specialwarriors.conal.user.domain.User;
 import com.specialwarriors.conal.user.exception.UserException;
 import com.specialwarriors.conal.user.repository.UserRepository;
@@ -36,6 +38,12 @@ public class UserServiceTest {
     @Mock
     private GithubOAuth2WebClient githubOAuth2WebClient;
 
+    @Mock
+    private GithubRepoRepository githubRepoRepository;
+
+    @Mock
+    private NotificationAgreementRepository notificationAgreementRepository;
+    
     @InjectMocks
     private UserService userService;
 
