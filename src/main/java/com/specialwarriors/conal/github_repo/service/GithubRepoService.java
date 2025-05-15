@@ -72,7 +72,7 @@ public class GithubRepoService {
     }
 
     private void validateCreateRequest(GithubRepoCreateRequest request) {
-        if (!request.name().isEmpty()) {
+        if (request.name().isEmpty()) {
             throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO_NAME);
         }
         if (!GITHUB_URL_PATTERN.matcher(request.url()).matches()) {
