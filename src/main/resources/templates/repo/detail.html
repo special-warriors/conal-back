@@ -203,7 +203,7 @@
     fetch(`/api/github/repos/${owner}/${repo}/update`, {method: 'POST'})
     .then(res => {
       if (!res.ok) {
-        throw new Error("업데이트 실패");
+        throw new Error("일시적으로 요청이 많습니다. 잠시 후에 다시 시도해주세요!");
       }
       return res.text();
     })
@@ -211,7 +211,7 @@
       setTimeout(fetchDetails, 2000);
       alert("업데이트 완료");
     })
-    .catch(err => alert("업데이트 오류: " + err.message))
+    .catch(err => alert(err.message))
     .finally(() => {
       setTimeout(() => {
         btn.disabled = false;
