@@ -23,8 +23,7 @@ public class VoteController {
 
     @GetMapping("/repositories/{repoId}/vote-form")
     public String getVoteForm(@PathVariable long repoId,
-            @RequestParam String userToken,
-            Model model) {
+            @RequestParam String userToken, Model model) {
 
         model.addAttribute("repositoryId", repoId);
         model.addAttribute("userToken", userToken);
@@ -38,6 +37,7 @@ public class VoteController {
     @PostMapping("/repositories/{repoId}/votes")
     public String submitVote(@PathVariable long repoId,
             @ModelAttribute @Valid VoteSubmitRequest request) {
+
         boolean result = voteService.saveVoteRequest(repoId, request);
 
         if (!result) {

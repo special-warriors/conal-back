@@ -8,10 +8,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NotificationAgreementRepository extends
-    JpaRepository<NotificationAgreement, Long> {
+        JpaRepository<NotificationAgreement, Long> {
 
     List<NotificationAgreement> findAllByGithubRepoIdAndNotificationType(Long githubRepoId,
-        NotificationType notificationType);
+            NotificationType notificationType);
 
     List<NotificationAgreement> findAllByNotificationType(NotificationType notificationType);
 

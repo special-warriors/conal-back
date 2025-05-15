@@ -21,8 +21,9 @@ public class VoteScheduler {
 
     @Scheduled(cron = "0 0 9 ? * FRI")
     public void openWeeklyVote() {
+
         List<NotificationAgreement> notificationAgreements = notificationAgreementQuery
-            .findAllByType(NotificationType.VOTE);
+                .findAllByType(NotificationType.VOTE);
 
         List<Long> repositoryIds = extractGithubRepoIdsFrom(notificationAgreements);
 
@@ -31,8 +32,9 @@ public class VoteScheduler {
 
     @Scheduled(cron = "0 0 18 ? * FRI")
     public void sendWeeklyVoteForm() {
+
         List<NotificationAgreement> notificationAgreements = notificationAgreementQuery
-            .findAllByType(NotificationType.VOTE);
+                .findAllByType(NotificationType.VOTE);
 
         List<Long> repositoryIds = extractGithubRepoIdsFrom(notificationAgreements);
 
@@ -43,13 +45,14 @@ public class VoteScheduler {
 
     @Scheduled(cron = "0 0 9 ? * MON")
     public void sendWeeklyVoteResult() {
+
         List<NotificationAgreement> notificationAgreements = notificationAgreementQuery
-            .findAllByType(NotificationType.VOTE);
+                .findAllByType(NotificationType.VOTE);
 
         List<Long> repositoryIds = extractGithubRepoIdsFrom(notificationAgreements);
         List<VoteResultResponse> voteResults = repositoryIds.stream()
-            .map(voteService::getVoteResult)
-            .toList();
+                .map(voteService::getVoteResult)
+                .toList();
 
         for (VoteResultResponse voteResult : voteResults) {
             List<String> emails = voteResult.emails();
@@ -59,11 +62,11 @@ public class VoteScheduler {
 
 
     private List<Long> extractGithubRepoIdsFrom(
-        List<NotificationAgreement> notificationAgreements) {
+            List<NotificationAgreement> notificationAgreements) {
 
         return notificationAgreements.stream()
-            .map(NotificationAgreement::getGithubRepoId)
-            .distinct()
-            .toList();
+                .map(NotificationAgreement::getGithubRepoId)
+                .distinct()
+                .toList();
     }
 }

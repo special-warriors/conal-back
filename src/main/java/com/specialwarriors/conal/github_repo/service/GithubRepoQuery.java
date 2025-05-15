@@ -16,7 +16,7 @@ public class GithubRepoQuery {
     public GithubRepo findByUserIdAndRepositoryId(Long userId, Long repositoryId) {
 
         GithubRepo githubRepo = githubRepoRepository.findById(repositoryId).orElseThrow(() ->
-            new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO)
+                new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO)
         );
 
         if (!userId.equals(githubRepo.getUser().getId())) {
@@ -29,6 +29,6 @@ public class GithubRepoQuery {
     public GithubRepo findByRepositoryId(long repositoryId) {
 
         return githubRepoRepository.findById(repositoryId)
-            .orElseThrow(() -> new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO));
+                .orElseThrow(() -> new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO));
     }
 }

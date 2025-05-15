@@ -11,12 +11,12 @@ import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.exception.GithubRepoException;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepository;
+import com.specialwarriors.conal.github_repo.util.UrlUtil;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
 import com.specialwarriors.conal.notification.enums.NotificationType;
 import com.specialwarriors.conal.notification.repository.NotificationAgreementRepository;
 import com.specialwarriors.conal.user.domain.User;
 import com.specialwarriors.conal.user.service.UserQuery;
-import com.specialwarriors.conal.util.UrlUtil;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -35,13 +35,13 @@ public class GithubRepoService {
     private static final int PAGE_SIZE = 7;
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
-        "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$",
-        Pattern.CASE_INSENSITIVE
+            "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$",
+            Pattern.CASE_INSENSITIVE
     );
 
     private static final Pattern GITHUB_URL_PATTERN = Pattern.compile(
-        "^(https://)?(www\\.)?github\\.com/[^/\\s]+/[^/\\s]+/?$",
-        Pattern.CASE_INSENSITIVE
+            "^(https://)?(www\\.)?github\\.com/[^/\\s]+/[^/\\s]+/?$",
+            Pattern.CASE_INSENSITIVE
     );
 
     private final GithubRepoRepository githubRepoRepository;
@@ -54,6 +54,7 @@ public class GithubRepoService {
 
     @Transactional
     public GithubRepoCreateResponse createGithubRepo(Long userId, GithubRepoCreateRequest request) {
+
         validateCreateRequest(request);
 
         User user = userQuery.findById(userId);
@@ -112,7 +113,7 @@ public class GithubRepoService {
     private List<Contributor> createAndSaveContributors(Set<String> emails) {
 
         List<Contributor> contributors = emails.stream()
-            .map(Contributor::new).toList();
+                .map(Contributor::new).toList();
 
         return (List<Contributor>) contributorRepository.saveAll(contributors);
     }
@@ -120,33 +121,36 @@ public class GithubRepoService {
     private List<NotificationAgreement> createAndAttachNotifications() {
 
         return notificationAgreementRepository.saveAll(
-            List.of(
-                new NotificationAgreement(NotificationType.VOTE),
-                new NotificationAgreement(NotificationType.CONTRIBUTION)
-            )
+                List.of(
+                        new NotificationAgreement(NotificationType.VOTE),
+                        new NotificationAgreement(NotificationType.CONTRIBUTION)
+                )
         );
     }
 
     @Transactional(readOnly = true)
     public GithubRepoGetResponse getGithubRepoInfo(Long userId, Long repoId) {
+
         GithubRepo githubRepo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repoId);
         String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
 
         return githubRepoMapper.toGithubRepoGetResponse(githubRepo, ownerAndRepo[0],
-            ownerAndRepo[1], userId);
+                ownerAndRepo[1], userId);
     }
 
     @Transactional(readOnly = true)
     public GithubRepoPageResponse getGithubRepoInfos(Long userId, int page) {
+
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         Page<GithubRepo> resultPage = githubRepoRepository.findGithubRepoPages(userId,
-            pageable);
+                pageable);
 
         return githubRepoMapper.toGithubRepoPageResponse(resultPage, userId);
     }
 
     @Transactional
     public void deleteRepo(Long userId, Long repositoryId) {
+
         GithubRepo repo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repositoryId);
         contributorRepository.deleteAllByGithubRepo(repo);
         notificationAgreementRepository.deleteByGithubRepoId(repo.getId());

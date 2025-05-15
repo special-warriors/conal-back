@@ -20,7 +20,7 @@ public class CustomOAuth2FailureHandler implements AuthenticationFailureHandler 
         if (exception.getMessage().contains("redirect")) {
             log.warn(new GeneralException(AuthException.INVALID_REDIRECT_URI).getMessage());
         } else if (exception.getMessage().contains("user cancelled")) {
-            log.warn(new GeneralException(AuthException.OAUTH_USER_CANCELLED).getMessage());
+            log.warn(new GeneralException(AuthException.OAUTH_USER_CANCELED).getMessage());
         } else {
             log.warn(new GeneralException(AuthException.OAUTH_PROVIDER_ERROR).getMessage());
         }
