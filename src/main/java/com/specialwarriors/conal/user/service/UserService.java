@@ -24,14 +24,14 @@ public class UserService {
     private final RedisTemplate<String, String> redisTemplate;
     private final GithubOAuth2WebClient githubOAuth2WebClient;
 
-    public User getUserByUserId(Long userId) {
+    public User findById(Long userId) {
 
         return userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(UserException.USER_NOT_FOUND));
     }
 
     @Transactional
-    public void deleteUser(Long userId) {
+    public void deleteById(Long userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(UserException.USER_NOT_FOUND));

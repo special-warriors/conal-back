@@ -32,7 +32,7 @@ public class UserController {
     @GetMapping("/home")
     public String home(Model model, @SessionAttribute("userId") Long userId) {
 
-        User user = userService.getUserByUserId(userId);
+        User user = userService.findById(userId);
         GithubRepoPageResponse response = githubRepoService.getGithubRepoInfos(userId, 0);
 
         model.addAttribute("repositories", response); // 레포지토리 리스트
@@ -57,7 +57,7 @@ public class UserController {
     @GetMapping("/mypage")
     public String myPage(Model model, @SessionAttribute("userId") Long userId) {
 
-        User user = userService.getUserByUserId(userId);
+        User user = userService.findById(userId);
         model.addAttribute("avatarUrl", user.getAvatarUrl());
         model.addAttribute("username", user.getUsername());
 
@@ -68,7 +68,7 @@ public class UserController {
     public String deleteUser(HttpServletRequest request, @SessionAttribute("userId") Long userId) {
 
         sessionManager.clearSession(request);
-        userService.deleteUser(userId);
+        userService.deleteById(userId);
 
         return "user/delete-success";
     }
