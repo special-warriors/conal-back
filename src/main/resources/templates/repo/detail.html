@@ -3,28 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <title>레포지토리 상세</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       background-color: #f9f9f9;
-      font-family: sans-serif;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: auto;
+      line-height: 1.6;
     }
 
     .container {
-      width: 800px;
+      width: 900px;
+      max-width: 95%;
+      margin: 2rem auto;
       background-color: white;
       padding: 2rem;
       border-radius: 16px;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     }
 
     h1, h2 {
       text-align: center;
+      color: #333;
+    }
+
+    h1 {
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.5rem;
     }
 
     .info-section, .notification-section, .contribution-section {
@@ -33,17 +46,24 @@
 
     .info-item {
       margin-bottom: 0.8rem;
-      font-size: 15px;
+      font-size: 1rem;
+      color: #555;
     }
 
     .info-item strong {
       display: inline-block;
       width: 120px;
+      color: #333;
     }
 
     a {
-      color: #333;
+      color: #6c757d; /* 링크 회색 */
       text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: #5a6268;
     }
 
     .checkbox-group {
@@ -51,46 +71,130 @@
       justify-content: center;
       gap: 2rem;
       margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f9f9f9;
+      border-radius: 8px;
     }
 
     label {
-      font-size: 14px;
+      font-size: 0.95rem;
+      color: #444;
+      display: flex;
+      align-items: center;
     }
 
     .checkbox-group input[type="checkbox"] {
       margin-right: 0.5rem;
-      transform: scale(1.1);
+      transform: scale(1.2);
       cursor: pointer;
+      accent-color: #007bff;
     }
 
     .refresh-button {
       display: block;
       margin: 1.5rem auto;
       padding: 0.6rem 1.2rem;
-      font-size: 14px;
+      font-size: 0.85rem;
+      font-weight: bold;
       border-radius: 8px;
-      background-color: white;
-      border: 1px solid #333;
+      background-color: #6c757d; /* 회색 버튼 */
+      color: white;
+      border: none;
       cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .refresh-button:hover {
+      background-color: #5a6268;
+    }
+
+    .refresh-button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1rem;
+      margin-top: 1.2rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     th, td {
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
       padding: 0.6rem;
+      text-align: left;
+      font-size: 0.9rem; /* 살짝 키움 */
+    }
+
+    th:first-child, td:first-child {
+      text-align: left;
+    }
+
+    td:not(:first-child) {
       text-align: center;
-      font-size: 14px;
     }
 
     th {
-      background-color: #f2f2f2;
+      background-color: #f7f7f7;
+      font-weight: 600;
+      color: #333;
     }
 
+    .chart-wrapper {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      margin-top: 2.5rem;
+    }
+
+    canvas {
+      width: 100% !important;
+      max-width: 100%;
+      height: 300px !important;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        width: 100%;
+        padding: 1rem;
+      }
+
+      .chart-wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .info-item, label {
+        font-size: 0.9rem;
+      }
+
+      th, td {
+        font-size: 0.8rem;
+        padding: 0.5rem;
+      }
+
+      .refresh-button {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+      }
+
+      .checkbox-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -109,53 +213,59 @@
   <div class="notification-section">
     <h2>알림 설정</h2>
     <div class="checkbox-group">
-      <label>
-        <input type="checkbox" id="vote-checkbox" onchange="toggleNotification('VOTE')"/>
-        투표 알림
-      </label>
-      <label>
-        <input type="checkbox" id="contribution-checkbox"
-               onchange="toggleNotification('CONTRIBUTION')"/>
-        기여도 알림
-      </label>
+      <label><input type="checkbox" id="vote-checkbox" onchange="toggleNotification('VOTE')"/> 투표 알림</label>
+      <label><input type="checkbox" id="contribution-checkbox"
+                    onchange="toggleNotification('CONTRIBUTION')"/> 기여도 알림</label>
     </div>
   </div>
 
   <div class="contribution-section">
     <h2>기여자 기여도</h2>
     <button class="refresh-button" id="refreshBtn" onclick="refreshDetails()">기여도 업데이트</button>
+
     <table>
       <thead>
       <tr>
         <th>기여자</th>
-        <th>총점</th>
+        <th>점수</th>
         <th>PR 수</th>
         <th>Issue 수</th>
         <th>Commit 수</th>
         <th>Merge된 PR 수</th>
       </tr>
       </thead>
-      <tbody id="detail-body">
-      <!-- JavaScript에서 채움 -->
-      </tbody>
+      <tbody id="detail-body"></tbody>
     </table>
+
+    <div class="chart-wrapper">
+      <canvas id="commitChart"></canvas>
+      <canvas id="prChart"></canvas>
+      <canvas id="mprChart"></canvas>
+      <canvas id="issueChart"></canvas>
+    </div>
   </div>
 </div>
 
 <script th:inline="javascript">
   const owner = /*[[${repoInfo.owner}]]*/ "owner";
   const repo = /*[[${repoInfo.repo}]]*/ "repo";
-  const userId = /*[[${repoInfo.userId}]]*/ 1;
-  const repoId = /*[[${repoInfo.repoId}]]*/ 2;
+  const userId = /*[[${repoInfo.userId}]]*/ "1";
+  const repoId = /*[[${repoInfo.repoId}]]*/ "2";
+  let charts = {};
 
   function loadNotificationStatus() {
     fetch(`/users/${userId}/repositories/${repoId}/notifications/status`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(data => {
       document.getElementById('vote-checkbox').checked = data.vote;
       document.getElementById('contribution-checkbox').checked = data.contribution;
     })
-    .catch(err => alert("알림 상태 불러오기 실패: " + err.message));
+    .catch(err => console.error("알림 상태 불러오기 실패: " + err.message));
   }
 
   function toggleNotification(type) {
@@ -168,38 +278,131 @@
     })
     .then(res => {
       if (!res.ok) {
-        throw new Error("설정 실패");
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
     })
-    .catch(err => alert("설정 오류: " + err.message));
+    .catch(err => {
+      alert("설정 오류: " + err.message);
+      document.getElementById(
+          type === 'VOTE' ? 'vote-checkbox' : 'contribution-checkbox').checked = !checked;
+    });
   }
 
   function fetchDetails() {
     fetch(`/api/github/repos/${owner}/${repo}/details`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(data => {
       const tbody = document.getElementById("detail-body");
       tbody.innerHTML = "";
-      for (const contributor in data) {
+
+      const labels = [], scoreData = [], commitData = [], prData = [], mprData = [], issueData = [];
+
+      const sortedContributors = Object.keys(data).sort((a, b) => {
+        if (data[b].score !== data[a].score) {
+          return data[b].score - data[a].score;
+        }
+        return a.localeCompare(b);
+      });
+
+      for (const contributor of sortedContributors) {
         const d = data[contributor];
+        labels.push(contributor);
+        scoreData.push(d.score);
+        commitData.push(d.commit);
+        prData.push(d.pr);
+        mprData.push(d.mpr);
+        issueData.push(d.issue);
+
         const row = `<tr>
-            <td>${contributor}</td>
-            <td>${d.total}</td>
-            <td>${d.pr}</td>
-            <td>${d.issue}</td>
-            <td>${d.commit}</td>
-            <td>${d.mpr}</td>
-          </tr>`;
+          <td>${contributor}</td>
+          <td>${parseFloat(d.score).toFixed(2)}</td>
+          <td>${d.pr}</td>
+          <td>${d.issue}</td>
+          <td>${d.commit}</td>
+          <td>${d.mpr}</td>
+        </tr>`;
         tbody.insertAdjacentHTML('beforeend', row);
       }
+
+      drawCharts(labels, commitData, prData, mprData, issueData);
     })
-    .catch(err => alert("기여도 조회 실패: " + err.message));
+    .catch(err => {
+      const tbody = document.getElementById("detail-body");
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">데이터를 불러오는 데 실패했습니다. (${err.message})</td></tr>`;
+    });
+  }
+
+  function drawCharts(labels, commit, pr, mpr, issue) {
+    const chartColors = [
+      'rgba(54, 162, 235, 0.7)',
+      'rgba(255, 99, 132, 0.7)',
+      'rgba(75, 192, 192, 0.7)',
+      'rgba(255, 206, 86, 0.7)'
+    ];
+
+    const configs = [
+      {id: 'commitChart', label: '커밋 수', data: commit, color: chartColors[0]},
+      {id: 'prChart', label: 'PR 수', data: pr, color: chartColors[1]},
+      {id: 'mprChart', label: 'Merge된 PR 수', data: mpr, color: chartColors[2]},
+      {id: 'issueChart', label: 'Issue 수', data: issue, color: chartColors[3]},
+    ];
+
+    configs.forEach(cfg => {
+      const ctx = document.getElementById(cfg.id).getContext('2d');
+      if (charts[cfg.id]) {
+        charts[cfg.id].destroy();
+      }
+
+      charts[cfg.id] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: cfg.label,
+            data: cfg.data,
+            backgroundColor: cfg.color,
+            borderColor: cfg.color.replace('0.7', '1'),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: `기여자별 ${cfg.label}`,
+              font: {size: 16, weight: 'bold'},
+              padding: {top: 10, bottom: 15}
+            },
+            legend: {display: false}
+          },
+          scales: {
+            x: {
+              title: {display: true, text: '기여자', font: {weight: '500'}},
+              grid: {display: false}
+            },
+            y: {
+              beginAtZero: true,
+              title: {display: true, text: cfg.label, font: {weight: '500'}},
+              ticks: {precision: 0}
+            }
+          }
+        }
+      });
+    });
   }
 
   function refreshDetails() {
     const btn = document.getElementById('refreshBtn');
     btn.disabled = true;
     btn.textContent = "3분 후 업데이트 가능";
+
     fetch(`/api/github/repos/${owner}/${repo}/update`, {method: 'POST'})
     .then(res => {
       if (!res.ok) {

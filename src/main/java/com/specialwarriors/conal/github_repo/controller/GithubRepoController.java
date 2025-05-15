@@ -30,7 +30,7 @@ public class GithubRepoController {
     public String showCreateForm(@SessionAttribute Long userId, Model model) {
 
         model.addAttribute("repoRequest",
-                new GithubRepoCreateRequest(userId, "", "", null, Set.of()));
+            new GithubRepoCreateRequest("", "", null, Set.of()));
         model.addAttribute("userId", userId);
 
         return "repo/form";
