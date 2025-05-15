@@ -36,9 +36,9 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(UserException.USER_NOT_FOUND));
 
-        List<GithubRepo> repos = githubRepoRepository.findByUserId(userId);
+        List<GithubRepo> repos = user.getGithubRepos();
         for (GithubRepo repo : repos) {
-            notificationAgreementRepository.deleteByGithubRepo(repo);
+            notificationAgreementRepository.deleteByGithubRepoId(repo.getId());
         }
 
         githubRepoRepository.deleteAll(repos);

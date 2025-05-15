@@ -44,6 +44,7 @@ public class GithubRepoService {
 
     @Transactional
     public GithubRepoCreateResponse createGithubRepo(Long userId, GithubRepoCreateRequest request) {
+
         validateCreateRequest(request);
 
         User user = userQuery.findById(userId);
@@ -62,9 +63,10 @@ public class GithubRepoService {
     }
 
     private void validateCreateRequest(GithubRepoCreateRequest request) {
+
         UrlUtil.validateGitHubUrl(request.url());
         if (request.emails().isEmpty()) {
-            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBEMAIL);
+            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUB_EMAIL);
         }
     }
 
@@ -72,7 +74,7 @@ public class GithubRepoService {
     private List<Contributor> createAndSaveContributors(Set<String> emails) {
 
         List<Contributor> contributors = emails.stream()
-            .map(Contributor::new).toList();
+                .map(Contributor::new).toList();
 
         return (List<Contributor>) contributorRepository.saveAll(contributors);
     }
@@ -80,33 +82,36 @@ public class GithubRepoService {
     private List<NotificationAgreement> createAndAttachNotifications() {
 
         return notificationAgreementRepository.saveAll(
-            List.of(
-                new NotificationAgreement(NotificationType.VOTE),
-                new NotificationAgreement(NotificationType.CONTRIBUTION)
-            )
+                List.of(
+                        new NotificationAgreement(NotificationType.VOTE),
+                        new NotificationAgreement(NotificationType.CONTRIBUTION)
+                )
         );
     }
 
     @Transactional(readOnly = true)
     public GithubRepoGetResponse getGithubRepoInfo(Long userId, Long repoId) {
+
         GithubRepo githubRepo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repoId);
         String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
 
         return githubRepoMapper.toGithubRepoGetResponse(githubRepo, ownerAndRepo[0],
-            ownerAndRepo[1], userId);
+                ownerAndRepo[1], userId);
     }
 
     @Transactional(readOnly = true)
     public GithubRepoPageResponse getGithubRepoInfos(Long userId, int page) {
+
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         Page<GithubRepo> resultPage = githubRepoRepositoryCustom.findGithubRepoPages(userId,
-            pageable);
+                pageable);
 
         return githubRepoMapper.toGithubRepoPageResponse(resultPage, userId);
     }
 
     @Transactional
     public void deleteRepo(Long userId, Long repositoryId) {
+
         GithubRepo repo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repositoryId);
         contributorRepository.deleteAllByGithubRepo(repo);
         notificationAgreementRepository.deleteByGithubRepoId(repo.getId());

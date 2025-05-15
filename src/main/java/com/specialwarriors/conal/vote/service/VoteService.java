@@ -32,6 +32,7 @@ public class VoteService {
     private final JwtTokenProvider jwtProvider;
 
     public void openVote(long repoId) {
+
         String voteKey = VOTE_OPEN_KEY_FORMAT.formatted(repoId);
 
         // 투표 참여자를 고유하게 식별한 토큰 생성
@@ -51,6 +52,7 @@ public class VoteService {
     }
 
     public List<String> findVoteTargetEmails(long repoId, String userToken) {
+
         String voteKey = VOTE_OPEN_KEY_FORMAT.formatted(repoId);
 
         if (!redisTemplate.hasKey(voteKey)) {
@@ -70,6 +72,7 @@ public class VoteService {
     }
 
     public List<VoteFormResponse> getVoteFormResponse(long repoId) {
+
         String voteKey = VOTE_OPEN_KEY_FORMAT.formatted(repoId);
 
         // 존재하는 투표인지 검증
@@ -89,6 +92,7 @@ public class VoteService {
     }
 
     public boolean saveVoteRequest(long repoId, VoteSubmitRequest request) {
+
         String voteKey = VOTE_OPEN_KEY_FORMAT.formatted(repoId);
 
         // 존재하는 투표인지 검증
@@ -118,6 +122,7 @@ public class VoteService {
     }
 
     public void saveVoteResult(long repoId, VoteSubmitRequest request) {
+
         final String votedEmail = request.votedEmail();
         final String voteResFormat = "vote:res:%s";
         String key = voteResFormat.formatted(repoId);
@@ -127,6 +132,7 @@ public class VoteService {
     }
 
     public VoteResultResponse getVoteResult(long repoId) {
+
         final String voteResFormat = "vote:res:%s";
         String key = voteResFormat.formatted(repoId);
 
