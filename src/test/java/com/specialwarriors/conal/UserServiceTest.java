@@ -9,11 +9,13 @@ import static org.mockito.Mockito.verify;
 import com.specialwarriors.conal.common.auth.oauth.GithubOAuth2WebClient;
 import com.specialwarriors.conal.common.exception.GeneralException;
 import com.specialwarriors.conal.user.domain.User;
+import com.specialwarriors.conal.user.exception.UserException;
 import com.specialwarriors.conal.user.repository.UserRepository;
 import com.specialwarriors.conal.user.service.UserService;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,68 +46,86 @@ public class UserServiceTest {
         mockUser = new User(1, "홍길동", "fdsf");
     }
 
-    @Test
-    @DisplayName("유저 아이디로 사용자를 조회할 수 있다")
-    void findUserByUserId() {
+    @Nested
+    @DisplayName("유저 아이디로 사용자를 조회할 때")
+    class FindUserById {
 
-        // given
-        given(userRepository.findById(1L)).willReturn(Optional.of(mockUser));
+        @Test
+        @DisplayName("성공한다")
+        void success() {
 
-        // when
-        User result = userService.getUserByUserId(1L);
+            // given
+            long userId = 1L;
+            given(userRepository.findById(userId)).willReturn(Optional.of(mockUser));
 
-        // then
-        assertThat(result).isEqualTo(mockUser);
-        verify(userRepository).findById(1L);
+            // when
+            User result = userService.getUser(userId);
+
+            // then
+            assertThat(result).isEqualTo(mockUser);
+            verify(userRepository).findById(userId);
+        }
+
+        @Test
+        @DisplayName("시용자가 존재하지 않으면 예외를 던진다")
+        void throwsExceptionWhenUserNotFoundById() {
+
+            // given
+            long userId = 1L;
+            given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+            // when, then
+            assertThatThrownBy(() -> userService.getUser(userId))
+                    .isInstanceOf(GeneralException.class)
+                    .extracting("exception")
+                    .isEqualTo(UserException.USER_NOT_FOUND);
+        }
     }
 
-    @Test
-    @DisplayName("유저 아이디로 사용자 조회 시 존재하지 않으면 예외를 던진다")
-    void throwsExceptionWhenUserNotFoundById() {
+    @Nested
+    @DisplayName("사용자를 삭제할 때")
+    class DeleteUser {
 
-        // given
-        given(userRepository.findById(1L)).willReturn(Optional.empty());
+        @Test
+        @DisplayName("깃허브 토큰과 세션을 삭제한다")
+        void deletesGithubTokenAndSessionWhenUserIsDeleted() {
 
-        // when, then
-        assertThatThrownBy(() -> {
-            userService.getUserByUserId(1L);
-        }).isInstanceOf(GeneralException.class);
+            // given
+            long userId = 1L;
+            String githubTokenKey = "github:token:1";
+            String githubTokenValue = "fake-access-token";
 
-        verify(userRepository).findById(1L);
+            given(userRepository.findById(userId)).willReturn(Optional.of(mockUser));
+
+            ValueOperations<String, String> ops = mock(ValueOperations.class);
+            given(redisTemplate.opsForValue()).willReturn(ops);
+            given(ops.get(githubTokenKey)).willReturn(githubTokenValue);
+
+            // when
+            userService.deleteUser(userId);
+
+            // then
+            verify(githubOAuth2WebClient).unlink(githubTokenValue);
+            verify(redisTemplate).unlink(githubTokenKey);
+            verify(userRepository).deleteById(userId);
+        }
+
+        @Test
+        @DisplayName("사용자가 존재하지 않으면 예외를 던진다")
+        void throwsExceptionWhenDeletingNonexistentUser() {
+
+            // given
+            long userId = 1L;
+            given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+            // when, then
+            assertThatThrownBy(() -> userService.deleteUser(userId))
+                    .isInstanceOf(GeneralException.class)
+                    .extracting("exception")
+                    .isEqualTo(UserException.USER_NOT_FOUND);
+
+            verify(userRepository).findById(userId);
+        }
     }
 
-    @Test
-    @DisplayName("사용자를 삭제할 때 깃허브 토큰과 세션을 삭제한다")
-    void deletesGithubTokenAndSessionWhenUserIsDeleted() {
-
-        // given
-        given(userRepository.findById(1L)).willReturn(Optional.of(mockUser));
-
-        ValueOperations<String, String> ops = mock(ValueOperations.class);
-        given(redisTemplate.opsForValue()).willReturn(ops);
-        given(ops.get("github:token:1")).willReturn("fake-access-token");
-
-        // when
-        userService.deleteUser(1L);
-
-        // then
-        verify(githubOAuth2WebClient).unlink("fake-access-token");
-        verify(redisTemplate).unlink("github:token:1");
-        verify(userRepository).deleteById(1L);
-    }
-
-    @Test
-    @DisplayName("사용자를 삭제하려 할 때 사용자가 존재하지 않으면 예외를 던진다")
-    void throwsExceptionWhenDeletingNonexistentUser() {
-
-        // given
-        given(userRepository.findById(1L)).willReturn(Optional.empty());
-
-        // when, then
-        assertThatThrownBy(() -> {
-            userService.deleteUser(1L);
-        }).isInstanceOf(GeneralException.class);
-
-        verify(userRepository).findById(1L);
-    }
 }
