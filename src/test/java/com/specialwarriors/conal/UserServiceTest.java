@@ -43,7 +43,7 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        mockUser = new User(1, "홍길동", "fdsf");
+        mockUser = new User(1, "홍길동", "honggildong@gmail.com");
     }
 
     @Nested
