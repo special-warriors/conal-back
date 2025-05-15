@@ -7,7 +7,6 @@ import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.github_repo.dto.GithubRepoMapper;
 import com.specialwarriors.conal.github_repo.dto.request.GithubRepoCreateRequest;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoCreateResponse;
-import com.specialwarriors.conal.github_repo.dto.response.GithubRepoDeleteResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.exception.GithubRepoException;
@@ -54,7 +53,7 @@ public class GithubRepoService {
         GithubRepo githubRepo = githubRepoMapper.toGithubRepo(request);
         githubRepo.setUser(user);
         githubRepo.addContributors(contributors);
-        githubRepo.setNotificationAgreement(agreements);
+        githubRepo.assignRepoIdToNotificationAgreements(agreements);
         githubRepo = githubRepoRepository.save(githubRepo);
 
         String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
@@ -79,6 +78,7 @@ public class GithubRepoService {
     }
 
     private List<NotificationAgreement> createAndAttachNotifications() {
+
         return notificationAgreementRepository.saveAll(
             List.of(
                 new NotificationAgreement(NotificationType.VOTE),
@@ -106,12 +106,10 @@ public class GithubRepoService {
     }
 
     @Transactional
-    public GithubRepoDeleteResponse deleteRepo(Long userId, Long repositoryId) {
+    public void deleteRepo(Long userId, Long repositoryId) {
         GithubRepo repo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repositoryId);
         contributorRepository.deleteAllByGithubRepo(repo);
-        notificationAgreementRepository.deleteByGithubRepo(repo);
+        notificationAgreementRepository.deleteByGithubRepoId(repo.getId());
         githubRepoRepository.delete(repo);
-
-        return githubRepoMapper.toGithubDeleteRepoResponse();
     }
 }

@@ -22,7 +22,7 @@ public class NotificationAgreementQuery {
         NotificationType type) {
 
         return notificationAgreementRepository
-            .findAllByGithubRepoAndNotificationType(githubRepo, type)
+            .findAllByGithubRepoIdAndNotificationType(githubRepo.getId(), type)
             .stream()
             .findFirst()
             .orElseThrow(() -> new GeneralException(
