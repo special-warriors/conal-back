@@ -17,9 +17,7 @@ public class GithubRepoQuery {
     private final UserQuery userQuery;
 
     public GithubRepo findByUserIdAndRepositoryId(long userId, long repositoryId) {
-
-        GithubRepo githubRepo = githubRepoRepository.findById(repositoryId)
-                .orElseThrow(() -> new GeneralException(GithubRepoException.GITHUB_REPO_NOT_FOUND));
+        GithubRepo githubRepo = findById(repositoryId);
 
         User user = userQuery.findById(userId);
 
