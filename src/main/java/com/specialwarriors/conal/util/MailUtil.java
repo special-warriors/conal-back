@@ -5,6 +5,8 @@ import com.specialwarriors.conal.vote.dto.response.VoteFormResponse;
 import com.specialwarriors.conal.vote.dto.response.VoteResultResponse;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -13,9 +15,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -31,6 +30,7 @@ public class MailUtil {
     private final JavaMailSender mailSender;
 
     public void sendVoteForm(VoteFormResponse response) {
+
         Map<String, Object> templateModel = new HashMap<>();
         templateModel.put("repoId", response.repoId());
         templateModel.put("userToken", response.userToken());
@@ -47,6 +47,7 @@ public class MailUtil {
     }
 
     public void sendVoteResult(String to, VoteResultResponse response) {
+
         Map<String, Object> templateModel = new HashMap<>();
         templateModel.put("response", response);
 
@@ -59,6 +60,7 @@ public class MailUtil {
 
     private void sendHtmlMail(String to, String subject, String templateName,
             Map<String, Object> templateModel) {
+
         Context thymeleafContext = new Context();
         thymeleafContext.setVariables(templateModel);
 
@@ -79,6 +81,7 @@ public class MailUtil {
     }
 
     public void sendContributionForm(ContributionFormResponse response) {
+
         HashMap<String, Object> templateModel = new HashMap<>();
         templateModel.put("email", response.email());
 

@@ -4,7 +4,6 @@ package com.specialwarriors.conal.github_repo.dto;
 import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.github_repo.dto.request.GithubRepoCreateRequest;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoCreateResponse;
-import com.specialwarriors.conal.github_repo.dto.response.GithubRepoDeleteResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse.GithubRepoSummary;
@@ -16,25 +15,25 @@ public interface GithubRepoMapper {
 
     GithubRepo toGithubRepo(GithubRepoCreateRequest request);
 
-    default GithubRepoCreateResponse toGithubRepoCreateResponse(String owner,
-        String reponame) {
+    default GithubRepoCreateResponse toGithubRepoCreateResponse(String owner, String reponame) {
+
         return new GithubRepoCreateResponse(
-            owner,
-            reponame
+                owner,
+                reponame
         );
     }
 
     default GithubRepoGetResponse toGithubRepoGetResponse(GithubRepo repo, String owner,
-        String reponame, Long userId) {
+            String reponame, Long userId) {
+
         return new GithubRepoGetResponse(
-            userId,
-            repo.getId(),
-            repo.getName(),
-            repo.getUrl(),
-            repo.getNotificationAgreements(),
-            repo.getEndDate(),
-            owner,
-            reponame
+                userId,
+                repo.getId(),
+                repo.getName(),
+                repo.getUrl(),
+                repo.getEndDate(),
+                owner,
+                reponame
         );
     }
 
@@ -42,20 +41,15 @@ public interface GithubRepoMapper {
     GithubRepoSummary toGithubRepoSummary(GithubRepo repo);
 
     default GithubRepoPageResponse toGithubRepoPageResponse(Page<GithubRepo> page, Long userId) {
-        return new GithubRepoPageResponse(
-            page.getContent().stream()
-                .map(this::toGithubRepoSummary)
-                .toList(),
-            userId,
-            page.getNumber(),
-            page.getTotalPages(),
-            page.getTotalElements()
-        );
-    }
 
-    default GithubRepoDeleteResponse toGithubDeleteRepoResponse() {
-        return new GithubRepoDeleteResponse(
-            true
+        return new GithubRepoPageResponse(
+                page.getContent().stream()
+                        .map(this::toGithubRepoSummary)
+                        .toList(),
+                userId,
+                page.getNumber(),
+                page.getTotalPages(),
+                page.getTotalElements()
         );
     }
 

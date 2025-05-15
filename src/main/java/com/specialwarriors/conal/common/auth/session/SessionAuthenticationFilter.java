@@ -19,13 +19,10 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
     private final SessionManager sessionManager;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         Long userId = sessionManager.getUserId(request);
-
         if (userId == null) {
             response.sendRedirect("/login/failure");
             return;
@@ -36,7 +33,9 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+
         String path = request.getRequestURI();
+
         return PERMIT_ALL_PATHS.contains(path);
     }
 
