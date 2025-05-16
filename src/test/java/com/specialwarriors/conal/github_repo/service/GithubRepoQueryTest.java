@@ -18,11 +18,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
 @ActiveProfiles("test")
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @DataJpaTest
 @Import(QuerydslConfig.class)
 class GithubRepoQueryTest {
@@ -44,7 +47,7 @@ class GithubRepoQueryTest {
     @Nested
     @DisplayName("ID로 Github Repository를 조회할 때 ")
     @Sql(scripts = "/sql/github_repo/service/find_by_repository_id_test_setup.sql",
-            executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+            executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
     class FindByIdTest {
 
         @DisplayName("성공한다.")
@@ -79,7 +82,7 @@ class GithubRepoQueryTest {
     @Nested
     @DisplayName("사용자 ID와 Github Repository ID로 Github Repository를 조회할 때 ")
     @Sql(scripts = "/sql/github_repo/service/find_by_user_id_and_repository_id_test_setup.sql",
-            executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+            executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
     class FindByUserIdAndRepositoryIdTest {
 
         @DisplayName("성공한다.")
