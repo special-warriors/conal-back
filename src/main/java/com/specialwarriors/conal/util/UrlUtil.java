@@ -1,4 +1,4 @@
-package com.specialwarriors.conal.github_repo.util;
+package com.specialwarriors.conal.util;
 
 import com.specialwarriors.conal.common.exception.GeneralException;
 import com.specialwarriors.conal.github_repo.exception.GithubRepoException;

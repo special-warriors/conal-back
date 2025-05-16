@@ -11,12 +11,12 @@ import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.exception.GithubRepoException;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepository;
-import com.specialwarriors.conal.github_repo.util.UrlUtil;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
 import com.specialwarriors.conal.notification.enums.NotificationType;
 import com.specialwarriors.conal.notification.repository.NotificationAgreementRepository;
 import com.specialwarriors.conal.user.domain.User;
 import com.specialwarriors.conal.user.service.UserQuery;
+import com.specialwarriors.conal.util.UrlUtil;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -82,9 +82,9 @@ public class GithubRepoService {
         }
 
         long validEmailCount = request.emails().stream()
-            .filter(Objects::nonNull)
-            .filter(email -> !email.trim().isEmpty())
-            .count();
+                .filter(Objects::nonNull)
+                .filter(email -> !email.trim().isEmpty())
+                .count();
 
         if (validEmailCount == 0) {
             throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO_EMAIL);
@@ -101,7 +101,7 @@ public class GithubRepoService {
                     throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_EMAIL);
                 }
             }
-            
+
         }
 
         if (request.endDate() == null) {
