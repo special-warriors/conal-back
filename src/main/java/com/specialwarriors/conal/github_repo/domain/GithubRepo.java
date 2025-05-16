@@ -45,9 +45,6 @@ public class GithubRepo {
     @OneToMany(mappedBy = "githubRepo", cascade = CascadeType.ALL)
     private List<Contributor> contributors = new ArrayList<>();
 
-    @OneToMany(mappedBy = "githubRepo")
-    private List<NotificationAgreement> notificationAgreements = new ArrayList<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -67,12 +64,12 @@ public class GithubRepo {
         }
     }
 
-    public void setNotificationAgreement(List<NotificationAgreement> agreements) {
-        for (NotificationAgreement agreement : agreements) {
-            this.notificationAgreements.add(agreement);
-            agreement.setGitHubRepo(this);
-        }
+    public void assignRepoIdToNotificationAgreements(
+        List<NotificationAgreement> notificationAgreements) {
+
+        notificationAgreements.forEach(agreement -> agreement.setGitHubRepoId(this.getId()));
     }
+
 
     public void setUser(User user) {
         this.user = user;

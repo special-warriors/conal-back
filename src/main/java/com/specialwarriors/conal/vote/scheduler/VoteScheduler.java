@@ -1,6 +1,5 @@
 package com.specialwarriors.conal.vote.scheduler;
 
-import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
 import com.specialwarriors.conal.notification.enums.NotificationType;
 import com.specialwarriors.conal.notification.service.NotificationAgreementQuery;
@@ -22,6 +21,7 @@ public class VoteScheduler {
 
     @Scheduled(cron = "0 0 9 ? * FRI")
     public void openWeeklyVote() {
+
         List<NotificationAgreement> notificationAgreements = notificationAgreementQuery
                 .findAllByType(NotificationType.VOTE);
 
@@ -32,6 +32,7 @@ public class VoteScheduler {
 
     @Scheduled(cron = "0 0 18 ? * FRI")
     public void sendWeeklyVoteForm() {
+
         List<NotificationAgreement> notificationAgreements = notificationAgreementQuery
                 .findAllByType(NotificationType.VOTE);
 
@@ -44,6 +45,7 @@ public class VoteScheduler {
 
     @Scheduled(cron = "0 0 9 ? * MON")
     public void sendWeeklyVoteResult() {
+
         List<NotificationAgreement> notificationAgreements = notificationAgreementQuery
                 .findAllByType(NotificationType.VOTE);
 
@@ -63,8 +65,8 @@ public class VoteScheduler {
             List<NotificationAgreement> notificationAgreements) {
 
         return notificationAgreements.stream()
-                .map(NotificationAgreement::getGithubRepo)
-                .map(GithubRepo::getId)
+                .map(NotificationAgreement::getGithubRepoId)
+                .distinct()
                 .toList();
     }
 }

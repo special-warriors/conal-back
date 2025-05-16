@@ -10,8 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum AuthException implements BaseException {
 
     OAUTH_PROVIDER_ERROR(HttpStatus.UNAUTHORIZED, "인증 제공자 오류"),
-    OAUTH_USER_CANCELLED(HttpStatus.UNAUTHORIZED, "사용자가 인증을 취소함"),
-    USER_MAPPING_FAILED(HttpStatus.UNAUTHORIZED, "OAuth 사용자 정보를 처리할 수 없음"),
+    OAUTH_USER_CANCELED(HttpStatus.UNAUTHORIZED, "사용자가 인증을 취소함"),
     INVALID_REDIRECT_URI(HttpStatus.UNAUTHORIZED, "리다이렉트 URI가 유효하지 않음"),
     EMPTY_OAUTH_TOKEN(HttpStatus.UNAUTHORIZED, "ACCESS TOKEN이 비어있음");
 

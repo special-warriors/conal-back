@@ -7,20 +7,20 @@ import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.github_repo.dto.GithubRepoMapper;
 import com.specialwarriors.conal.github_repo.dto.request.GithubRepoCreateRequest;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoCreateResponse;
-import com.specialwarriors.conal.github_repo.dto.response.GithubRepoDeleteResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoGetResponse;
 import com.specialwarriors.conal.github_repo.dto.response.GithubRepoPageResponse;
 import com.specialwarriors.conal.github_repo.exception.GithubRepoException;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepository;
-import com.specialwarriors.conal.github_repo.repository.GithubRepoRepositoryCustom;
-import com.specialwarriors.conal.github_repo.util.UrlUtil;
 import com.specialwarriors.conal.notification.domain.NotificationAgreement;
 import com.specialwarriors.conal.notification.enums.NotificationType;
 import com.specialwarriors.conal.notification.repository.NotificationAgreementRepository;
 import com.specialwarriors.conal.user.domain.User;
 import com.specialwarriors.conal.user.service.UserQuery;
+import com.specialwarriors.conal.util.UrlUtil;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,10 +34,19 @@ public class GithubRepoService {
 
     private static final int PAGE_SIZE = 7;
 
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+            "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$",
+            Pattern.CASE_INSENSITIVE
+    );
+
+    private static final Pattern GITHUB_URL_PATTERN = Pattern.compile(
+            "^(https://)?(www\\.)?github\\.com/[^/\\s]+/[^/\\s]+/?$",
+            Pattern.CASE_INSENSITIVE
+    );
+
     private final GithubRepoRepository githubRepoRepository;
     private final ContributorRepository contributorRepository;
     private final NotificationAgreementRepository notificationAgreementRepository;
-    private final GithubRepoRepositoryCustom githubRepoRepositoryCustom;
 
     private final UserQuery userQuery;
     private final GithubRepoQuery githubRepoQuery;
@@ -45,6 +54,7 @@ public class GithubRepoService {
 
     @Transactional
     public GithubRepoCreateResponse createGithubRepo(Long userId, GithubRepoCreateRequest request) {
+
         validateCreateRequest(request);
 
         User user = userQuery.findById(userId);
@@ -54,8 +64,8 @@ public class GithubRepoService {
         GithubRepo githubRepo = githubRepoMapper.toGithubRepo(request);
         githubRepo.setUser(user);
         githubRepo.addContributors(contributors);
-        githubRepo.setNotificationAgreement(agreements);
         githubRepo = githubRepoRepository.save(githubRepo);
+        githubRepo.assignRepoIdToNotificationAgreements(agreements);
 
         String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
 
@@ -63,9 +73,39 @@ public class GithubRepoService {
     }
 
     private void validateCreateRequest(GithubRepoCreateRequest request) {
-        UrlUtil.validateGitHubUrl(request.url());
-        if (request.emails().isEmpty()) {
-            throw new GeneralException(GithubRepoException.CONTRIBUTOR_EMAIL_NOT_FOUND);
+        if (request.name().isEmpty()) {
+            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO_NAME);
+        }
+
+        if (!GITHUB_URL_PATTERN.matcher(request.url()).matches()) {
+            throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_URL);
+        }
+
+        long validEmailCount = request.emails().stream()
+                .filter(Objects::nonNull)
+                .filter(email -> !email.trim().isEmpty())
+                .count();
+
+        if (validEmailCount == 0) {
+            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO_EMAIL);
+        }
+        if (validEmailCount > 5) {
+            throw new GeneralException(GithubRepoException.EXCEED_GITHUBREPO_EMAIL);
+        }
+
+        for (String email : request.emails()) {
+
+            if (Objects.nonNull(email)) {
+                String trimmed = email.trim();
+                if (!trimmed.isEmpty() && !EMAIL_PATTERN.matcher(trimmed).matches()) {
+                    throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_EMAIL);
+                }
+            }
+
+        }
+
+        if (request.endDate() == null) {
+            throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_DURATION);
         }
     }
 
@@ -73,45 +113,47 @@ public class GithubRepoService {
     private List<Contributor> createAndSaveContributors(Set<String> emails) {
 
         List<Contributor> contributors = emails.stream()
-            .map(Contributor::new).toList();
+                .map(Contributor::new).toList();
 
         return (List<Contributor>) contributorRepository.saveAll(contributors);
     }
 
     private List<NotificationAgreement> createAndAttachNotifications() {
+
         return notificationAgreementRepository.saveAll(
-            List.of(
-                new NotificationAgreement(NotificationType.VOTE),
-                new NotificationAgreement(NotificationType.CONTRIBUTION)
-            )
+                List.of(
+                        new NotificationAgreement(NotificationType.VOTE),
+                        new NotificationAgreement(NotificationType.CONTRIBUTION)
+                )
         );
     }
 
     @Transactional(readOnly = true)
-    public GithubRepoGetResponse getGithubRepoInfo(long userId, long repoId) {
+    public GithubRepoGetResponse getGithubRepoInfo(Long userId, Long repoId) {
+
         GithubRepo githubRepo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repoId);
         String[] ownerAndRepo = UrlUtil.urlToOwnerAndReponame(githubRepo.getUrl());
 
         return githubRepoMapper.toGithubRepoGetResponse(githubRepo, ownerAndRepo[0],
-            ownerAndRepo[1], userId);
+                ownerAndRepo[1], userId);
     }
 
     @Transactional(readOnly = true)
-    public GithubRepoPageResponse getGithubRepoInfos(long userId, int page) {
+    public GithubRepoPageResponse getGithubRepoInfos(Long userId, int page) {
+
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Page<GithubRepo> resultPage = githubRepoRepositoryCustom.findGithubRepoPages(userId,
-            pageable);
+        Page<GithubRepo> resultPage = githubRepoRepository.findGithubRepoPages(userId,
+                pageable);
 
         return githubRepoMapper.toGithubRepoPageResponse(resultPage, userId);
     }
 
     @Transactional
-    public GithubRepoDeleteResponse deleteRepo(Long userId, Long repositoryId) {
+    public void deleteRepo(Long userId, Long repositoryId) {
+
         GithubRepo repo = githubRepoQuery.findByUserIdAndRepositoryId(userId, repositoryId);
         contributorRepository.deleteAllByGithubRepo(repo);
-        notificationAgreementRepository.deleteByGithubRepo(repo);
+        notificationAgreementRepository.deleteByGithubRepoId(repo.getId());
         githubRepoRepository.delete(repo);
-
-        return githubRepoMapper.toGithubDeleteRepoResponse();
     }
 }

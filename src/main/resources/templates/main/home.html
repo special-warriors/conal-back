@@ -153,6 +153,7 @@
       </a>
       <form th:action="@{|/users/repositories/${repository.id}|}" method="post"
             onsubmit="return confirm('정말 레포지토리를 삭제하시겠습니까?');">
+        <input type="hidden" name="_method" value="delete"/>
         <button class="repo-delete" type="submit">x</button>
       </form>
     </div>

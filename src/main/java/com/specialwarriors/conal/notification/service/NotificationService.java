@@ -23,13 +23,13 @@ public class NotificationService {
 
     @Transactional
     public void updateNotificationAgreement(long userId, long repositoryId,
-        NotificationAgreementUpdateRequest request) {
+            NotificationAgreementUpdateRequest request) {
 
         GithubRepo githubRepo = githubRepoQuery.findById(repositoryId);
 
         NotificationType notificationType = NotificationType.valueOf(request.type());
         NotificationAgreement notificationAgreement = notificationAgreementQuery
-            .findByGithubRepoAndType(githubRepo, notificationType);
+                .findByGithubRepoAndType(githubRepo, notificationType);
 
         // 사용자가 자신의 github repo에 접근한 것이 맞는 지 검증
         User user = userQuery.findById(userId);

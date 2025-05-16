@@ -27,6 +27,7 @@ public class GitHubService {
     private final WebClient githubWebClient;
 
     public Mono<Void> updateRepoContribution(String owner, String repo) {
+
         return getContributors(owner, repo)
             .flatMapMany(contributors -> {
                 String contributorKey = buildContributorsKey(owner, repo);
@@ -46,6 +47,7 @@ public class GitHubService {
     }
 
     private Mono<List<GitHubContributor>> getContributors(String owner, String repo) {
+
         return githubWebClient.get()
             .uri("/repos/{owner}/{repo}/contributors", owner, repo)
             .retrieve()
@@ -55,6 +57,7 @@ public class GitHubService {
 
     private Mono<Void> updateContributorScore(String owner, String repo,
         GitHubContributor contributor) {
+
         String login = contributor.login();
 
         return Mono.zip(
@@ -67,7 +70,7 @@ public class GitHubService {
             long pr = tuple.getT2();
             long mpr = tuple.getT3();
             long issue = tuple.getT4();
-            long totalScore = commit + pr + mpr + issue;
+            double score = commit * 0.1 + pr * 0.2 + mpr + issue * 0.2;
 
             String detailKey = buildDetailKey(owner, repo, login);
 
@@ -76,13 +79,14 @@ public class GitHubService {
                     "pr", String.valueOf(pr),
                     "mpr", String.valueOf(mpr),
                     "issue", String.valueOf(issue),
-                    "total", String.valueOf(totalScore)
+                    "score", String.valueOf(score)
                 ))
                 .then(reactiveRedisTemplate.expire(detailKey, TTL));
         }).then();
     }
 
     private Mono<Long> getCommitCount(String owner, String repo, String login) {
+
         return getAllCommits(owner, repo, 1)
             .filter(commit -> {
                 Map author = (Map) commit.get("author");

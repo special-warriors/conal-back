@@ -17,11 +17,13 @@ public class JwtTokenProvider {
     private final SecretKey secretKey;
 
     public JwtTokenProvider(@Value("${spring.jwt.secret-key}") String secret) {
+
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8),
                 SIG.HS256.key().build().getAlgorithm());
     }
 
     public String createVoteUserToken(String email, Date issuedAt, long expirationMillis) {
+
         Date expiration = new Date(issuedAt.getTime() + expirationMillis);
 
         return Jwts.builder()
