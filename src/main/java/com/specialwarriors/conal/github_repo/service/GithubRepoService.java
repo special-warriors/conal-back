@@ -150,7 +150,7 @@ public class GithubRepoService {
                 pageable);
 
         int totalPages = resultPage.getTotalPages();
-        if (page > totalPages) {
+        if (page >= totalPages && totalPages > 0) {
             throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_PAGE);
         }
 
