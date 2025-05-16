@@ -141,9 +141,18 @@ public class GithubRepoService {
     @Transactional(readOnly = true)
     public GithubRepoPageResponse getGithubRepoInfos(Long userId, int page) {
 
+        if (page < 0) {
+            throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_PAGE);
+        }
+
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         Page<GithubRepo> resultPage = githubRepoRepository.findGithubRepoPages(userId,
                 pageable);
+
+        int totalPages = resultPage.getTotalPages();
+        if (page >= totalPages) {
+            throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_PAGE);
+        }
 
         return githubRepoMapper.toGithubRepoPageResponse(resultPage, userId);
     }
