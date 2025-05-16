@@ -4,6 +4,7 @@ import com.specialwarriors.conal.common.exception.GeneralException;
 import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.github_repo.exception.GithubRepoException;
 import com.specialwarriors.conal.github_repo.repository.GithubRepoRepository;
+import com.specialwarriors.conal.user.exception.UserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,10 @@ public class GithubRepoQuery {
     private final GithubRepoRepository githubRepoRepository;
 
     public GithubRepo findByUserIdAndRepositoryId(Long userId, Long repositoryId) {
+
+        if (userId == null) {
+            throw new GeneralException(UserException.USER_NOT_FOUND);
+        }
 
         GithubRepo githubRepo = githubRepoRepository.findById(repositoryId).orElseThrow(() ->
                 new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO)

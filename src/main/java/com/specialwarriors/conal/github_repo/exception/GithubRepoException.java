@@ -16,7 +16,8 @@ public enum GithubRepoException implements BaseException {
     EXCEED_GITHUBREPO_EMAIL(HttpStatus.BAD_REQUEST, "이메일은 5개까지 등록할 수 있습니다"),
     INVALID_GITHUBREPO_URL(HttpStatus.BAD_REQUEST, "잘못된 URL 입니다."),
     INVALID_GITHUBREPO_EMAIL(HttpStatus.BAD_REQUEST, "잘못된 이메일 입니다"),
-    INVALID_GITHUBREPO_DURATION(HttpStatus.NOT_FOUND, "종료일이 존재하지 않습니다");
+    INVALID_GITHUBREPO_DURATION(HttpStatus.NOT_FOUND, "종료일이 존재하지 않습니다"),
+    INVALID_GITHUBREPO_PAGE(HttpStatus.BAD_REQUEST, "페이지 번호가 없습니다.");
 
     private final HttpStatus status;
     private final String message;
