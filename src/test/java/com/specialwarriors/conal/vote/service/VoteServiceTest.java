@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -15,6 +16,7 @@ import com.specialwarriors.conal.common.exception.GeneralException;
 import com.specialwarriors.conal.contributor.domain.Contributor;
 import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.github_repo.service.GithubRepoQuery;
+import com.specialwarriors.conal.vote.dto.request.VoteSubmitRequest;
 import com.specialwarriors.conal.vote.dto.response.VoteFormResponse;
 import com.specialwarriors.conal.vote.exception.VoteException;
 import io.jsonwebtoken.JwtException;
@@ -33,6 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 
@@ -276,6 +279,110 @@ class VoteServiceTest {
             // then
             assertThatThrownBy(() -> voteService.getVoteFormResponse(REPO_ID))
                     .isInstanceOf(JwtException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("투표 요청 저장 시 ")
+    class SaveVoteRequestTest {
+
+        @DisplayName("성공한다.")
+        @Test
+        public void success() {
+            // given
+            when(redisTemplate.hasKey(any(String.class))).thenReturn(true);
+
+            Set<String> userTokens = IntStream.range(0, 4)
+                    .mapToObj(i -> USER_TOKEN + i)
+                    .collect(Collectors.toSet());
+            SetOperations<String, String> setOperations = mock(SetOperations.class);
+            when(redisTemplate.opsForSet()).thenReturn(setOperations);
+            when(setOperations.members(any(String.class))).thenReturn(userTokens);
+
+            HashOperations<String, Object, Object> hashOperations = mock(HashOperations.class);
+            when(hashOperations.hasKey(any(String.class), any(String.class))).thenReturn(false);
+            when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+
+            String userToken = userTokens.stream().findAny().get();
+            String votedEmail = EMAILS.stream().findAny().get();
+            VoteSubmitRequest request = new VoteSubmitRequest(REPO_ID, userToken, votedEmail);
+
+            // when
+            boolean result = voteService.saveVoteRequest(REPO_ID, request);
+
+            // then
+            assertThat(result).isTrue();
+            verify(hashOperations).put(any(String.class), eq(userToken), eq(votedEmail));
+            verify(redisTemplate).expire(any(String.class), any(Duration.class));
+        }
+
+        @DisplayName("이미 투표한 경우 false를 반환한다.")
+        @Test
+        public void alreadyVoted() {
+            // given
+            when(redisTemplate.hasKey(any(String.class))).thenReturn(true);
+
+            Set<String> userTokens = IntStream.range(0, 4)
+                    .mapToObj(i -> USER_TOKEN + i)
+                    .collect(Collectors.toSet());
+            SetOperations<String, String> setOperations = mock(SetOperations.class);
+            when(redisTemplate.opsForSet()).thenReturn(setOperations);
+            when(setOperations.members(any(String.class))).thenReturn(userTokens);
+
+            HashOperations<String, Object, Object> hashOperations = mock(HashOperations.class);
+            when(hashOperations.hasKey(any(String.class), any(String.class))).thenReturn(true);
+            when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+
+            String userToken = userTokens.stream().findAny().get();
+            String votedEmail = EMAILS.stream().findAny().get();
+            VoteSubmitRequest request = new VoteSubmitRequest(REPO_ID, userToken, votedEmail);
+
+            // when
+            boolean result = voteService.saveVoteRequest(REPO_ID, request);
+
+            // then
+            assertThat(result).isFalse();
+        }
+
+        @DisplayName("투표 오픈 내역이 존재하지 않을 경우 예외가 발생한다.")
+        @Test
+        public void voteNotFound() {
+            // given
+            when(redisTemplate.hasKey(any(String.class))).thenReturn(false);
+
+            String votedEmail = EMAILS.stream().findAny().get();
+            VoteSubmitRequest request = new VoteSubmitRequest(REPO_ID, USER_TOKEN, votedEmail);
+
+            // when
+
+            // then
+            assertThatThrownBy(() -> voteService.saveVoteRequest(REPO_ID, request))
+                    .isInstanceOf(GeneralException.class)
+                    .extracting("exception")
+                    .isEqualTo(VoteException.VOTE_NOT_FOUND);
+        }
+
+        @DisplayName("투표에 접근할 수 없는 사용자일 경우 예외가 발생한다.")
+        @Test
+        public void unauthorizedVoteAccess() {
+            // given
+            when(redisTemplate.hasKey(any(String.class))).thenReturn(true);
+
+            Set<String> userTokens = Collections.EMPTY_SET;
+            SetOperations<String, String> setOperations = mock(SetOperations.class);
+            when(redisTemplate.opsForSet()).thenReturn(setOperations);
+            when(setOperations.members(any(String.class))).thenReturn(userTokens);
+
+            String votedEmail = EMAILS.stream().findAny().get();
+            VoteSubmitRequest request = new VoteSubmitRequest(REPO_ID, USER_TOKEN, votedEmail);
+
+            // when
+
+            // then
+            assertThatThrownBy(() -> voteService.saveVoteRequest(REPO_ID, request))
+                    .isInstanceOf(GeneralException.class)
+                    .extracting("exception")
+                    .isEqualTo(VoteException.UNAUTHORIZED_VOTE_ACCESS);
         }
     }
 }
