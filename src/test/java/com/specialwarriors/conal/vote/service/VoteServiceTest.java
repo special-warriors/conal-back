@@ -303,8 +303,8 @@ class VoteServiceTest {
             when(hashOperations.hasKey(any(String.class), any(String.class))).thenReturn(false);
             when(redisTemplate.opsForHash()).thenReturn(hashOperations);
 
-            String userToken = userTokens.stream().findAny().get();
-            String votedEmail = EMAILS.stream().findAny().get();
+            String userToken = userTokens.stream().findFirst().get();
+            String votedEmail = EMAILS.get(0);
             VoteSubmitRequest request = new VoteSubmitRequest(REPO_ID, userToken, votedEmail);
 
             // when
@@ -333,8 +333,8 @@ class VoteServiceTest {
             when(hashOperations.hasKey(any(String.class), any(String.class))).thenReturn(true);
             when(redisTemplate.opsForHash()).thenReturn(hashOperations);
 
-            String userToken = userTokens.stream().findAny().get();
-            String votedEmail = EMAILS.stream().findAny().get();
+            String userToken = userTokens.stream().findFirst().get();
+            String votedEmail = EMAILS.get(0);
             VoteSubmitRequest request = new VoteSubmitRequest(REPO_ID, userToken, votedEmail);
 
             // when
@@ -350,7 +350,7 @@ class VoteServiceTest {
             // given
             when(redisTemplate.hasKey(any(String.class))).thenReturn(false);
 
-            String votedEmail = EMAILS.stream().findAny().get();
+            String votedEmail = EMAILS.get(0);
             VoteSubmitRequest request = new VoteSubmitRequest(REPO_ID, USER_TOKEN, votedEmail);
 
             // when
@@ -373,7 +373,7 @@ class VoteServiceTest {
             when(redisTemplate.opsForSet()).thenReturn(setOperations);
             when(setOperations.members(any(String.class))).thenReturn(userTokens);
 
-            String votedEmail = EMAILS.stream().findAny().get();
+            String votedEmail = EMAILS.get(0);
             VoteSubmitRequest request = new VoteSubmitRequest(REPO_ID, USER_TOKEN, votedEmail);
 
             // when
@@ -384,5 +384,22 @@ class VoteServiceTest {
                     .extracting("exception")
                     .isEqualTo(VoteException.UNAUTHORIZED_VOTE_ACCESS);
         }
+    }
+
+    @DisplayName("투표 결과를 저장할 때 성공한다.")
+    @Test
+    public void saveVoteResult() {
+        // given
+        VoteSubmitRequest request = new VoteSubmitRequest(REPO_ID, USER_TOKEN, EMAILS.get(0));
+
+        HashOperations<String, Object, Object> hashOperations = mock(HashOperations.class);
+        when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+
+        // when
+        voteService.saveVoteResult(REPO_ID, request);
+
+        // then
+        verify(hashOperations).increment(any(String.class), eq(request.votedEmail()), eq(1L));
+        verify(redisTemplate).expire(any(String.class), any(Duration.class));
     }
 }
