@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.6-SNAPSHOT'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
 group = 'com.specialwarriors'
@@ -92,4 +93,55 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+def jacocoExcludePatterns = [
+        'com/specialwarriors/conal/ConalApplication.class',
+        '**/common/**',
+        '**/exception/**',
+        '**/dto/**',
+        '**/config/**',
+        '**/enums/**',
+        '**/converter/**',
+        '**/test/**'
+]
+
+for (qPattern in '**/QA'..'**/QZ') {
+    jacocoExcludePatterns.add(qPattern + '*')
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        csv.required = true
+        html.required = true
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, excludes: jacocoExcludePatterns)
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+
+        rule {
+            enabled = true
+            element = 'CLASS'
+
+            // 커버리지 제외 범위
+            excludes = jacocoExcludePatterns
+        }
+    }
+}
+
+clean {
+    delete file('src/main/generated')
 }

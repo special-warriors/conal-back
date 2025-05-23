@@ -74,11 +74,11 @@ public class GithubRepoService {
 
     private void validateCreateRequest(GithubRepoCreateRequest request) {
         if (request.name().isEmpty()) {
-            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO_NAME);
+            throw new GeneralException(GithubRepoException.GITHUB_REPO_NAME_NOT_FOUND);
         }
 
         if (!GITHUB_URL_PATTERN.matcher(request.url()).matches()) {
-            throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_URL);
+            throw new GeneralException(GithubRepoException.INVALID_GITHUB_REPO_URL);
         }
 
         long validEmailCount = request.emails().stream()
@@ -87,10 +87,10 @@ public class GithubRepoService {
                 .count();
 
         if (validEmailCount == 0) {
-            throw new GeneralException(GithubRepoException.NOT_FOUND_GITHUBREPO_EMAIL);
+            throw new GeneralException(GithubRepoException.GITHUB_REPO_EMAIL_NOT_FOUND);
         }
         if (validEmailCount > 5) {
-            throw new GeneralException(GithubRepoException.EXCEED_GITHUBREPO_EMAIL);
+            throw new GeneralException(GithubRepoException.GITHUB_REPO_EMAIL_LIMIT_EXCEED);
         }
 
         for (String email : request.emails()) {
@@ -98,14 +98,14 @@ public class GithubRepoService {
             if (Objects.nonNull(email)) {
                 String trimmed = email.trim();
                 if (!trimmed.isEmpty() && !EMAIL_PATTERN.matcher(trimmed).matches()) {
-                    throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_EMAIL);
+                    throw new GeneralException(GithubRepoException.INVALID_GITHUB_REPO_EMAIL);
                 }
             }
 
         }
 
         if (request.endDate() == null) {
-            throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_DURATION);
+            throw new GeneralException(GithubRepoException.INVALID_GITHUB_REPO_DURATION);
         }
     }
 

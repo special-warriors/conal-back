@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,3 +38,11 @@ jobs:
 
       - name: gradlew test
         run: ./gradlew test
+
+      - name : add coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.7.2
+        with:
+          paths: |
+            ${{ github.workspace }}/**/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}

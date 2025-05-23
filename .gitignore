@@ -36,5 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
-### properties/yml ###
+### properties ###
 /src/main/resources/conal-back-secret/*.properties
+
+### querydsl Qclass ##
+/src/main/generated/

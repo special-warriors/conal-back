@@ -19,7 +19,7 @@ public class UrlUtil {
 
             return new String[]{owner, repoName};
         } else {
-            throw new GeneralException(GithubRepoException.INVALID_GITHUBREPO_URL);
+            throw new GeneralException(GithubRepoException.INVALID_GITHUB_REPO_URL);
         }
     }
 

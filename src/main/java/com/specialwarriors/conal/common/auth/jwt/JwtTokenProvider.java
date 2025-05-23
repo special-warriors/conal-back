@@ -34,7 +34,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String getEmailFrom(String token) {
+    public String extractEmailFrom(String token) {
 
         return Jwts.parser().verifyWith(secretKey).build()
                 .parseSignedClaims(token)
