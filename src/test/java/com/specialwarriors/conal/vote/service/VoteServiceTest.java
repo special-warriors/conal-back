@@ -3,6 +3,7 @@ package com.specialwarriors.conal.vote.service;
 import static com.specialwarriors.conal.github_repo.exception.GithubRepoException.GITHUB_REPO_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,13 +19,16 @@ import com.specialwarriors.conal.github_repo.domain.GithubRepo;
 import com.specialwarriors.conal.github_repo.service.GithubRepoQuery;
 import com.specialwarriors.conal.vote.dto.request.VoteSubmitRequest;
 import com.specialwarriors.conal.vote.dto.response.VoteFormResponse;
+import com.specialwarriors.conal.vote.dto.response.VoteResultResponse;
 import com.specialwarriors.conal.vote.exception.VoteException;
 import io.jsonwebtoken.JwtException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -43,8 +47,10 @@ import org.springframework.data.redis.core.SetOperations;
 class VoteServiceTest {
 
     private final long REPO_ID = 1L;
-    private final List<String> EMAILS = List.of("mj3242@naver.com", "mj1111@naver.com",
-            "mj2222@naver.com", "mj3333@naver.com");
+    private final List<String> EMAILS = List.of("mj3242@naver.com",
+            "mj1111@naver.com",
+            "mj2222@naver.com",
+            "mj3333@naver.com");
     private final String USER_TOKEN = "header.payload.signature";
 
     @Mock
@@ -401,5 +407,52 @@ class VoteServiceTest {
         // then
         verify(hashOperations).increment(any(String.class), eq(request.votedEmail()), eq(1L));
         verify(redisTemplate).expire(any(String.class), any(Duration.class));
+    }
+
+    @Nested
+    @DisplayName("투표 결과를 조회할 때 ")
+    class GetVoteResultTest {
+
+        @DisplayName("성공한다.")
+        @Test
+        public void success() {
+            // given
+            Map<Object, Object> entries = Map.of(
+                    EMAILS.get(0), 1,
+                    EMAILS.get(1), 0,
+                    EMAILS.get(2), 1,
+                    EMAILS.get(3), 2
+            );
+
+            HashOperations<String, Object, Object> hashOperations = mock(HashOperations.class);
+            when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+            when(hashOperations.entries(any(String.class))).thenReturn(entries);
+
+            // when
+            VoteResultResponse response = voteService.getVoteResult(REPO_ID);
+
+            // then
+            assertThat(response.items()).hasSize(entries.size())
+                    .extracting("email", "votes")
+                    .containsExactlyInAnyOrder(tuple(EMAILS.get(0), 1),
+                            tuple(EMAILS.get(1), 0),
+                            tuple(EMAILS.get(2), 1),
+                            tuple(EMAILS.get(3), 2));
+        }
+
+        @DisplayName("투표 참여 내역이 없을 경우 빈 List를 포함한 응답을 반환한다.")
+        @Test
+        public void noVoteParticipants() {
+            // given
+            HashOperations<String, Object, Object> hashOperations = mock(HashOperations.class);
+            when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+            when(hashOperations.entries(any(String.class))).thenReturn(new HashMap<>());
+
+            // when
+            VoteResultResponse response = voteService.getVoteResult(REPO_ID);
+
+            // then
+            assertThat(response.items()).isEmpty();
+        }
     }
 }
